@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Edit3 } from 'lucide-react'
+import { X, Save, Edit3, Trash2 } from 'lucide-react'
 import { Product } from '../types/product'
 import { getFallbackImage, getDisplayImageUrl } from '../lib/image-fallback'
 
@@ -9,6 +9,7 @@ interface ProductDetailsModalProps {
   onClose: () => void
   product: Product | null
   onSave: (updatedProduct: Partial<Product>) => void
+  onDelete?: (productId: string) => Promise<void>
   onEditingChange?: (field: string, value: string | number | boolean) => void
 }
 
@@ -27,6 +28,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   onClose,
   product,
   onSave,
+  onDelete,
   onEditingChange
 }) => {
   const [formData, setFormData] = useState<FormData>({
@@ -40,6 +42,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   })
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
 
   useEffect(() => {
     if (product) {
@@ -95,6 +98,26 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
     }
   }
 
+  const handleDelete = async () => {
+    if (!product || !onDelete) return
+
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${product.name}"? This action cannot be undone and will remove the product from your vault completely.`
+    )
+
+    if (!confirmed) return
+
+    setIsDeleting(true)
+    try {
+      await onDelete(product.id)
+      onClose()
+    } catch (error) {
+      console.error('Error deleting product:', error)
+    } finally {
+      setIsDeleting(false)
+    }
+  }
+
   if (!product) return null
 
   return (
@@ -122,15 +145,27 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               </div>
               <div className="flex items-center space-x-2">
                 {!isEditing && (
-                  <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => setIsEditing(true)}
-                    className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
-                  >
-                    <Edit3 className="w-4 h-4" />
-                    <span>Edit</span>
-                  </motion.button>
+                  <>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => setIsEditing(true)}
+                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                    >
+                      <Edit3 className="w-4 h-4" />
+                      <span>Edit</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleDelete}
+                      disabled={isDeleting}
+                      className="bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                      <span>{isDeleting ? 'Deleting...' : 'Delete'}</span>
+                    </motion.button>
+                  </>
                 )}
                 <motion.button
                   whileHover={{ scale: 1.05 }}

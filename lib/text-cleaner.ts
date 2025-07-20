@@ -153,7 +153,7 @@ export function improveTitleCapitalization(title: string): string {
 async function cleanWithAI(name: string, description: string, brand: string): Promise<CleanedText | null> {
   if (!genAI) return null
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite-preview-06-17' })
   
   const prompt = `Clean and format this beauty product information. Return ONLY a valid JSON object:
 

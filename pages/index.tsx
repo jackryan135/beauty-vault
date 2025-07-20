@@ -570,6 +570,27 @@ export default function Home() {
     }
   }
 
+  const handleDeleteProduct = async (productId: string) => {
+    try {
+      const response = await fetch(`/api/products/${productId}/delete`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('session_token')}`
+        },
+      })
+
+      if (response.ok) {
+        setProducts(prev => prev.filter(p => p.id !== productId))
+        toast.success('Product deleted successfully')
+      } else {
+        const error = await response.json()
+        toast.error(error.message || 'Failed to delete product')
+      }
+    } catch {
+      toast.error('Failed to delete product')
+    }
+  }
+
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -968,6 +989,7 @@ export default function Home() {
           }}
           product={selectedProduct}
           onSave={handleUpdateProduct}
+          onDelete={handleDeleteProduct}
           onEditingChange={selectedProduct ? (field: string, value: any) => 
             handleEditingChange(selectedProduct.id, field, value) : undefined}
         />

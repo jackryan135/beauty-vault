@@ -45,7 +45,7 @@ async function searchForRealProductWithGemini(sku: string): Promise<AIProductInf
     throw new Error('Gemini AI not initialized')
   }
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-1.5-pro' })
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite-preview-06-17' })
   
   const prompt = `Search for a REAL beauty product with SKU: ${sku}. 
 
