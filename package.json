@@ -20,7 +20,7 @@
   "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
-    "framer-motion": "^10.18.0",
+    "framer-motion": "^12.23.6",
     "lucide-react": "^0.263.1",
     "next": "^11.1.4",
     "pg": "^7.18.2",
