@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Lock, User, Eye, EyeOff } from 'lucide-react'
+import { Lock, User, Eye, EyeOff, Sparkles, Crown } from 'lucide-react'
 import { LoginRequest } from '../types/product'
 
 interface LoginModalProps {
@@ -36,7 +36,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
         password: password.trim(),
         name: isGuestMode ? name.trim() : undefined
       })
-    } catch (error) {
+    } catch {
       setError('Login failed. Please try again.')
     }
   }
@@ -59,7 +59,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="modal-backdrop">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -74,19 +74,19 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden"
+            className="modal-content"
           >
             {/* Header */}
-            <div className="bg-gradient-to-r from-sephora-500 to-rose-500 p-6 text-white">
-              <div className="flex items-center space-x-3">
-                <div className="p-2 bg-white bg-opacity-20 rounded-full">
-                  <Lock className="h-6 w-6" />
+            <div className="sephora-gradient p-8 text-white">
+              <div className="flex items-center space-x-4">
+                <div className="p-3 bg-white bg-opacity-20 rounded-2xl">
+                  <Sparkles className="h-8 w-8" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-elegant font-bold">
+                  <h2 className="text-3xl font-display font-bold">
                     Olivia&apos;s Beauty Vault
                   </h2>
-                  <p className="text-sephora-100 text-sm">
+                  <p className="text-white/90 text-base font-medium">
                     {isGuestMode ? 'Guest Access' : 'Admin Access'}
                   </p>
                 </div>
@@ -94,48 +94,54 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
             </div>
 
             {/* Content */}
-            <div className="p-6">
-              <form onSubmit={handleSubmit} className="space-y-6">
+            <div className="p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
                 {/* Mode Toggle */}
                 <div className="flex items-center justify-center space-x-4">
                   <button
                     type="button"
                     onClick={toggleMode}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    className={`px-6 py-3 rounded-2xl text-base font-semibold transition-all duration-300 ${
                       !isGuestMode
-                        ? 'bg-sephora-500 text-white shadow-lg'
+                        ? 'sephora-gradient text-white shadow-medium'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    Admin
+                    <div className="flex items-center gap-2">
+                      <Crown className="w-4 h-4" />
+                      Admin
+                    </div>
                   </button>
                   <button
                     type="button"
                     onClick={toggleMode}
-                    className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-200 ${
+                    className={`px-6 py-3 rounded-2xl text-base font-semibold transition-all duration-300 ${
                       isGuestMode
-                        ? 'bg-rose-500 text-white shadow-lg'
+                        ? 'rose-gradient text-white shadow-medium'
                         : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
                     }`}
                   >
-                    Guest
+                    <div className="flex items-center gap-2">
+                      <User className="w-4 h-4" />
+                      Guest
+                    </div>
                   </button>
                 </div>
 
                 {/* Guest Name Input */}
                 {isGuestMode && (
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-base font-semibold text-gray-700 mb-3">
                       Your Name
                     </label>
                     <div className="relative">
-                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                      <User className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                       <input
                         type="text"
                         value={name}
                         onChange={(e) => setName(e.target.value)}
                         placeholder="Enter your name"
-                        className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sephora-500 focus:border-transparent transition-all duration-200"
+                        className="input-field pl-12 pr-4 py-4 text-base"
                         disabled={loading}
                       />
                     </div>
@@ -144,23 +150,23 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
 
                 {/* Password Input */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-base font-semibold text-gray-700 mb-3">
                     Password
                   </label>
                   <div className="relative">
-                    <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
+                    <Lock className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
                     <input
                       type={showPassword ? 'text' : 'password'}
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       placeholder={isGuestMode ? 'Enter guest password' : 'Enter admin password'}
-                      className="w-full pl-10 pr-12 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-sephora-500 focus:border-transparent transition-all duration-200"
+                      className="input-field pl-12 pr-12 py-4 text-base"
                       disabled={loading}
                     />
                     <button
                       type="button"
                       onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                       disabled={loading}
                     >
                       {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
@@ -173,9 +179,9 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
                   <motion.div
                     initial={{ opacity: 0, y: -10 }}
                     animate={{ opacity: 1, y: 0 }}
-                    className="bg-red-50 border border-red-200 rounded-lg p-3"
+                    className="bg-gradient-to-r from-red-50 to-rose-50 border border-red-200 rounded-2xl p-4"
                   >
-                    <p className="text-red-600 text-sm">{error}</p>
+                    <p className="text-red-600 text-base font-medium">{error}</p>
                   </motion.div>
                 )}
 
@@ -183,11 +189,11 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
                 <button
                   type="submit"
                   disabled={loading}
-                  className="w-full bg-gradient-to-r from-sephora-500 to-rose-500 text-white py-3 rounded-lg font-medium hover:from-sephora-600 hover:to-rose-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 shadow-lg hover:shadow-xl"
+                  className="btn-primary w-full py-4 text-lg font-semibold"
                 >
                   {loading ? (
                     <div className="flex items-center justify-center space-x-2">
-                      <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                      <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
                       <span>Signing in...</span>
                     </div>
                   ) : (
@@ -197,8 +203,8 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
               </form>
 
               {/* Help Text */}
-              <div className="mt-6 text-center">
-                <p className="text-gray-500 text-sm">
+              <div className="mt-8 text-center">
+                <p className="text-gray-600 text-base leading-relaxed">
                   {isGuestMode 
                     ? 'Guest access allows you to view products on the shelf and create shopping lists.'
                     : 'Admin access provides full control over the beauty vault.'

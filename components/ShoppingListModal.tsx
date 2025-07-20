@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingBag, X, Plus, Minus, Trash2, Check } from 'lucide-react'
-import { ShoppingList, ShoppingListItem, Product } from '../types/product'
-import toast from 'react-hot-toast'
+import { ShoppingBag, X, Plus, Minus, Trash2 } from 'lucide-react'
+import { ShoppingList } from '../types/product'
 
 interface ShoppingListModalProps {
   isOpen: boolean

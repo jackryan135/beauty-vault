@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Hash, Loader, ArrowUp, Palette } from 'lucide-react'
+import { X, Hash, Loader, Gem, Sparkles } from 'lucide-react'
 
 interface AddProductModalProps {
   isOpen: boolean
@@ -30,7 +30,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="modal-backdrop">
           {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
@@ -45,45 +45,45 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative bg-white rounded-3xl p-8 max-w-md w-full card-shadow"
+            className="modal-content max-w-md p-8"
           >
             {/* Header */}
-            <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center space-x-3">
-                <div className="sephora-gradient p-2 rounded-full">
-                  <Palette className="h-6 w-6 text-white" />
+            <div className="flex items-center justify-between mb-8">
+              <div className="flex items-center space-x-4">
+                <div className="sephora-gradient p-3 rounded-2xl shadow-medium">
+                  <Gem className="h-7 w-7 text-white" />
                 </div>
-                <h2 className="text-2xl font-elegant font-bold text-gray-800">
+                <h2 className="text-2xl font-display font-bold text-gray-800">
                   Add to Beauty Vault
                 </h2>
               </div>
               <button
                 onClick={onClose}
-                className="text-gray-400 hover:text-gray-600 transition-colors"
+                className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-xl"
               >
                 <X className="h-6 w-6" />
               </button>
             </div>
 
             {/* Form */}
-            <form onSubmit={handleSubmit} className="space-y-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div>
-                <label htmlFor="sku" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="sku" className="block text-base font-semibold text-gray-700 mb-3">
                   Product SKU
                 </label>
                 <div className="relative">
-                  <Hash className="absolute left-3 top-1/2 transform -translate-y-1/2 text-sephora-400 h-5 w-5" />
+                  <Hash className="absolute left-4 top-1/2 transform -translate-y-1/2 text-sephora-400 h-5 w-5" />
                   <input
                     type="text"
                     id="sku"
                     value={sku}
                     onChange={(e) => setSku(e.target.value)}
                     placeholder="Enter product SKU..."
-                    className="w-full pl-10 pr-4 py-4 border border-sephora-200 rounded-2xl focus:border-sephora-400 focus:ring-2 focus:ring-sephora-100 transition-all duration-200 placeholder-sephora-400"
+                    className="input-field pl-12 pr-4 py-4 text-base focus:ring-2 focus:ring-sephora-100"
                     disabled={loading}
                   />
                 </div>
-                <p className="mt-2 text-sm text-gray-500">
+                <p className="mt-3 text-sm text-gray-600">
                   We&apos;ll automatically generate product details for your collection
                 </p>
               </div>
@@ -92,12 +92,12 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
               <motion.button
                 type="submit"
                 disabled={!sku.trim() || loading}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`w-full py-4 rounded-2xl font-medium flex items-center justify-center space-x-2 transition-all duration-200 ${
+                whileHover={!sku.trim() || loading ? {} : { scale: 1.02 }}
+                whileTap={!sku.trim() || loading ? {} : { scale: 0.98 }}
+                className={`w-full py-4 rounded-2xl font-semibold flex items-center justify-center space-x-2 transition-all duration-300 ${
                   !sku.trim() || loading
-                    ? 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                    : 'sephora-gradient text-white shadow-lg hover:shadow-xl'
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'
+                    : 'btn-primary'
                 }`}
               >
                 {loading ? (
@@ -107,7 +107,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
                   </>
                 ) : (
                   <>
-                    <ArrowUp className="h-5 w-5" />
+                    <Sparkles className="h-5 w-5" />
                     <span>Add to Beauty Vault</span>
                   </>
                 )}
@@ -115,13 +115,25 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
             </form>
 
             {/* Info */}
-            <div className="mt-6 p-4 bg-sephora-50 rounded-2xl">
-              <h3 className="font-medium text-sephora-800 mb-2">How it works:</h3>
-              <ul className="text-sm text-sephora-700 space-y-1">
-                <li>• <strong>First time:</strong> Creates new product entry</li>
-                <li>• <strong>Existing product:</strong> Increases quantity by 1</li>
-                <li>• <strong>Product details:</strong> Generated automatically</li>
-                <li>• <strong>Scan out:</strong> Use when product is consumed</li>
+            <div className="mt-8 p-6 bg-gradient-to-r from-sephora-50 to-rose-50 rounded-2xl border border-sephora-100 shadow-soft">
+              <h3 className="font-semibold text-sephora-800 mb-4 text-base">How it works:</h3>
+              <ul className="text-sm text-sephora-700 space-y-3">
+                <li className="flex items-start gap-3">
+                  <span className="text-sephora-500 font-bold text-lg">•</span>
+                  <span><strong>First time:</strong> Creates new product entry</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-sephora-500 font-bold text-lg">•</span>
+                  <span><strong>Existing product:</strong> Increases quantity by 1</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-sephora-500 font-bold text-lg">•</span>
+                  <span><strong>Product details:</strong> Generated automatically</span>
+                </li>
+                <li className="flex items-start gap-3">
+                  <span className="text-sephora-500 font-bold text-lg">•</span>
+                  <span><strong>Scan out:</strong> Use when product is consumed</span>
+                </li>
               </ul>
             </div>
           </motion.div>

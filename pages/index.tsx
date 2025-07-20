@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Plus, Search, Package, ShoppingBag, ArrowUp, ArrowDown, Heart, Palette, Trash2, LogOut, Users, ShoppingCart, History } from 'lucide-react'
+import { Search, Package, ArrowDown, Heart, Trash2, LogOut, ShoppingCart, History, Sparkles, Gem, Crown } from 'lucide-react'
 import ProductCard from '../components/ProductCard'
 import AddProductModal from '../components/AddProductModal'
 import ScanOutModal from '../components/ScanOutModal'
@@ -64,7 +64,7 @@ export default function Home() {
           localStorage.removeItem('user')
           setIsLoginModalOpen(true)
         }
-      } catch (error) {
+      } catch {
         localStorage.removeItem('session_token')
         localStorage.removeItem('user')
         setIsLoginModalOpen(true)
@@ -97,7 +97,7 @@ export default function Home() {
         const error = await response.json()
         toast.error(error.message || 'Login failed')
       }
-    } catch (error) {
+    } catch {
       toast.error('Login failed')
     } finally {
       setLoginLoading(false)
@@ -189,7 +189,7 @@ export default function Home() {
       } else {
         toast.error('Failed to add to shopping list')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to add to shopping list')
     }
   }
@@ -210,7 +210,7 @@ export default function Home() {
       } else {
         toast.error('Failed to update item')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to update item')
     }
   }
@@ -225,65 +225,23 @@ export default function Home() {
       })
 
       if (response.ok) {
-        toast.success('Item removed from shopping list')
-        fetchShoppingList()
+        const result = await response.json()
+        if (result.list_deleted) {
+          toast.success('Item removed and shopping list deleted')
+          setShoppingList(null)
+        } else {
+          toast.success('Item removed from shopping list')
+          fetchShoppingList()
+        }
       } else {
         toast.error('Failed to remove item')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to remove item')
     }
   }
 
-  const handleCheckoutShoppingListItem = async (itemId: string) => {
-    try {
-      const response = await fetch(`/api/shopping-list/items/${itemId}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('session_token')}`
-        },
-        body: JSON.stringify({ is_checked_out: true }),
-      })
 
-      if (response.ok) {
-        const result = await response.json()
-        if (result.list_completed) {
-          toast.success('Shopping list completed!')
-          setShoppingList(null)
-        } else {
-          toast.success('Item checked out!')
-          fetchShoppingList()
-        }
-      } else {
-        toast.error('Failed to check out item')
-      }
-    } catch (error) {
-      toast.error('Failed to check out item')
-    }
-  }
-
-  const handleCheckoutAllShoppingList = async () => {
-    if (!shoppingList) return
-    
-    try {
-      const response = await fetch(`/api/admin/shopping-lists/${shoppingList.id}/checkout-all`, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('session_token')}`
-        },
-      })
-
-      if (response.ok) {
-        toast.success('All items checked out!')
-        fetchShoppingList()
-      } else {
-        toast.error('Failed to check out all items')
-      }
-    } catch (error) {
-      toast.error('Failed to check out all items')
-    }
-  }
 
   const handleClearShoppingList = async () => {
     if (!shoppingList) return
@@ -302,7 +260,7 @@ export default function Home() {
       } else {
         toast.error('Failed to clear shopping list')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to clear shopping list')
     }
   }
@@ -323,7 +281,7 @@ export default function Home() {
       } else {
         toast.error('Failed to clear shopping list')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to clear shopping list')
     }
   }
@@ -350,7 +308,7 @@ export default function Home() {
       } else {
         toast.error('Failed to check out item')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to check out item')
     }
   }
@@ -370,7 +328,7 @@ export default function Home() {
       } else {
         toast.error('Failed to check out all items')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to check out all items')
     }
   }
@@ -385,12 +343,17 @@ export default function Home() {
       })
 
       if (response.ok) {
-        toast.success('Item removed!')
+        const result = await response.json()
+        if (result.list_deleted) {
+          toast.success('Item removed and shopping list deleted!')
+        } else {
+          toast.success('Item removed!')
+        }
         fetchAllShoppingLists()
       } else {
         toast.error('Failed to remove item')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to remove item')
     }
   }
@@ -427,7 +390,7 @@ export default function Home() {
         const error = await response.json()
         toast.error(error.message || 'Failed to add product')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to add product')
     }
   }
@@ -464,7 +427,7 @@ export default function Home() {
       } else {
         toast.error('Failed to scan out product')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to scan out product')
     }
   }
@@ -488,7 +451,7 @@ export default function Home() {
       } else {
         toast.error('Failed to scan out product')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to scan out product')
     }
   }
@@ -574,7 +537,7 @@ export default function Home() {
       } else {
         toast.error('Failed to update product')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to update product')
     }
   }
@@ -590,7 +553,6 @@ export default function Home() {
       })
 
       if (response.ok) {
-        const result = await response.json()
         setProducts(prev => 
           prev.map(p => 
             p.id === productId 
@@ -603,7 +565,7 @@ export default function Home() {
         const error = await response.json()
         toast.error(error.message || 'Failed to update product status')
       }
-    } catch (error) {
+    } catch {
       toast.error('Failed to update product status')
     }
   }
@@ -640,35 +602,35 @@ export default function Home() {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="min-h-screen bg-gradient-to-br from-sephora-50 to-rose-50">
+      <div className="min-h-screen luxury-gradient">
         {/* Header */}
-        <header className="glass-effect border-b border-sephora-200">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+        <header className="glass-effect-strong border-b border-sephora-200/50">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-3">
-                <div className="sephora-gradient p-3 rounded-full">
-                  <Palette className="h-8 w-8 text-white" />
+              <div className="flex items-center space-x-4">
+                <div className="sephora-gradient p-4 rounded-2xl shadow-large">
+                  <Sparkles className="h-8 w-8 text-white" />
                 </div>
                 <div>
-                  <h1 className="text-3xl font-elegant font-bold text-gradient">
+                  <h1 className="text-4xl font-display font-bold text-gradient">
                     Olivia&apos;s Beauty Vault
                   </h1>
-                  <p className="text-sephora-600 text-sm">
+                  <p className="text-sephora-600 text-base font-medium">
                     {user ? `${user.name} (${user.role})` : 'Your personal beauty collection'}
                   </p>
                 </div>
               </div>
               
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-4">
                 {/* Login button when not logged in */}
                 {!user && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsLoginModalOpen(true)}
-                    className="sephora-gradient text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="btn-primary flex items-center space-x-2"
                   >
-                    <Palette className="h-5 w-5" />
+                    <Sparkles className="h-5 w-5" />
                     <span>Login</span>
                   </motion.button>
                 )}
@@ -680,9 +642,9 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsAdminShoppingListsModalOpen(true)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
                     >
-                      <Users className="h-5 w-5" />
+                      <Crown className="h-5 w-5" />
                       <span>All Lists</span>
                     </motion.button>
                     
@@ -691,7 +653,7 @@ export default function Home() {
                       whileTap={{ scale: 0.95 }}
                       onClick={handleClearDatabase}
                       disabled={isClearing}
-                      className="bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white px-4 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                      className="btn-danger flex items-center space-x-2"
                     >
                       <Trash2 className="h-5 w-5" />
                       <span>{isClearing ? 'Clearing...' : 'Clear DB'}</span>
@@ -701,7 +663,7 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsScanOutModalOpen(true)}
-                      className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                      className="rose-gradient text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
                     >
                       <ArrowDown className="h-5 w-5" />
                       <span>Check out by SKU</span>
@@ -711,9 +673,9 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsModalOpen(true)}
-                      className="sephora-gradient text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                      className="btn-primary flex items-center space-x-2"
                     >
-                      <ArrowUp className="h-5 w-5" />
+                      <Gem className="h-5 w-5" />
                       <span>Add to Vault</span>
                     </motion.button>
                   </>
@@ -725,7 +687,7 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsShoppingListModalOpen(true)}
-                      className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                      className="rose-gradient text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
                     >
                       <ShoppingCart className="h-5 w-5" />
                       <span>Shopping List ({shoppingList?.items?.length || 0})</span>
@@ -735,7 +697,7 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsCheckoutHistoryModalOpen(true)}
-                      className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
                     >
                       <History className="h-5 w-5" />
                       <span>Checkout History</span>
@@ -749,7 +711,7 @@ export default function Home() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleLogout}
-                    className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
+                    className="btn-secondary flex items-center space-x-2"
                   >
                     <LogOut className="h-5 w-5" />
                     <span>Logout</span>
@@ -762,45 +724,45 @@ export default function Home() {
 
         {/* Search Bar */}
         {user && (
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div className="relative">
-              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-sephora-400 h-5 w-5" />
+              <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-sephora-400 h-6 w-6" />
               <input
                 type="text"
                 placeholder="Search products by name, SKU, or brand..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-12 pr-4 py-4 bg-white rounded-2xl border border-sephora-200 focus:border-sephora-400 focus:ring-2 focus:ring-sephora-100 transition-all duration-200 placeholder-sephora-400"
+                className="input-field pl-16 pr-6 py-5 text-lg"
               />
             </div>
           </div>
         )}
 
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
           {!user ? (
             // Not logged in - show login prompt
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="text-center py-20"
+              className="text-center py-24"
             >
-              <div className="sephora-gradient p-8 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                <Palette className="h-12 w-12 text-white" />
+              <div className="sephora-gradient p-10 rounded-3xl w-32 h-32 mx-auto mb-8 flex items-center justify-center shadow-luxury">
+                <Sparkles className="h-16 w-16 text-white" />
               </div>
-              <h3 className="text-xl font-elegant font-semibold text-gray-800 mb-2">
+              <h3 className="text-3xl font-display font-bold text-gray-800 mb-4">
                 Welcome to Olivia&apos;s Beauty Vault
               </h3>
-              <p className="text-gray-600 mb-6">
+              <p className="text-gray-600 mb-8 text-lg">
                 Please log in to view and manage products.
               </p>
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
                 onClick={() => setIsLoginModalOpen(true)}
-                className="sephora-gradient text-white px-8 py-4 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200 mx-auto"
+                className="btn-primary flex items-center space-x-3 mx-auto text-lg px-10 py-4"
               >
-                <Palette className="h-5 w-5" />
+                <Sparkles className="h-6 w-6" />
                 <span>Login</span>
               </motion.button>
             </motion.div>
@@ -811,15 +773,17 @@ export default function Home() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-12"
+                  className="mb-16"
                 >
-                  <div className="flex items-center space-x-3 mb-6">
-                    <Package className="h-6 w-6 text-blue-600" />
-                    <h2 className="text-2xl font-elegant font-semibold text-gray-800">
+                  <div className="flex items-center space-x-4 mb-8">
+                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-3 rounded-2xl shadow-medium">
+                      <Package className="h-7 w-7 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-display font-bold text-gray-800">
                       Available Products ({onShelfProducts.length})
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {onShelfProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -838,15 +802,15 @@ export default function Home() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-20"
+                  className="text-center py-24"
                 >
-                  <div className="sephora-gradient p-8 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                    <Package className="h-12 w-12 text-white" />
+                  <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-10 rounded-3xl w-32 h-32 mx-auto mb-8 flex items-center justify-center shadow-luxury">
+                    <Package className="h-16 w-16 text-white" />
                   </div>
-                  <h3 className="text-xl font-elegant font-semibold text-gray-800 mb-2">
+                  <h3 className="text-3xl font-display font-bold text-gray-800 mb-4">
                     No products available on shelf
                   </h3>
-                  <p className="text-gray-600">
+                  <p className="text-gray-600 text-lg">
                     Check back later for available products.
                   </p>
                 </motion.div>
@@ -860,15 +824,17 @@ export default function Home() {
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="mb-12"
+                  className="mb-16"
                 >
-                  <div className="flex items-center space-x-3 mb-6">
-                    <ShoppingBag className="h-6 w-6 text-sephora-600" />
-                    <h2 className="text-2xl font-elegant font-semibold text-gray-800">
+                  <div className="flex items-center space-x-4 mb-8">
+                    <div className="sephora-gradient p-3 rounded-2xl shadow-medium">
+                      <Gem className="h-7 w-7 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-display font-bold text-gray-800">
                       In Your Vault ({inVaultProducts.length})
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {inVaultProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -889,15 +855,17 @@ export default function Home() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
-                  className="mb-12"
+                  className="mb-16"
                 >
-                  <div className="flex items-center space-x-3 mb-6">
-                    <Package className="h-6 w-6 text-blue-600" />
-                    <h2 className="text-2xl font-elegant font-semibold text-gray-800">
+                  <div className="flex items-center space-x-4 mb-8">
+                    <div className="bg-gradient-to-r from-blue-500 to-indigo-500 p-3 rounded-2xl shadow-medium">
+                      <Package className="h-7 w-7 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-display font-bold text-gray-800">
                       On Shelf ({onShelfProducts.length})
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {onShelfProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -919,13 +887,15 @@ export default function Home() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <div className="flex items-center space-x-3 mb-6">
-                    <Package className="h-6 w-6 text-gray-500" />
-                    <h2 className="text-2xl font-elegant font-semibold text-gray-600">
+                  <div className="flex items-center space-x-4 mb-8">
+                    <div className="bg-gradient-to-r from-gray-400 to-gray-500 p-3 rounded-2xl shadow-medium">
+                      <Package className="h-7 w-7 text-white" />
+                    </div>
+                    <h2 className="text-3xl font-display font-bold text-gray-600">
                       Used Up ({usedUpProducts.length})
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
                     {usedUpProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -945,15 +915,15 @@ export default function Home() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  className="text-center py-20"
+                  className="text-center py-24"
                 >
-                  <div className="sephora-gradient p-8 rounded-full w-24 h-24 mx-auto mb-6 flex items-center justify-center">
-                    <Heart className="h-12 w-12 text-white" />
+                  <div className="sephora-gradient p-10 rounded-3xl w-32 h-32 mx-auto mb-8 flex items-center justify-center shadow-luxury">
+                    <Heart className="h-16 w-16 text-white" />
                   </div>
-                  <h3 className="text-xl font-elegant font-semibold text-gray-800 mb-2">
+                  <h3 className="text-3xl font-display font-bold text-gray-800 mb-4">
                     {searchTerm ? 'No products found' : 'Your beauty vault is empty'}
                   </h3>
-                  <p className="text-gray-600 mb-6">
+                  <p className="text-gray-600 mb-8 text-lg">
                     {searchTerm 
                       ? 'Try adjusting your search terms'
                       : 'Start building your beauty collection by scanning in your first product'
@@ -964,9 +934,9 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsModalOpen(true)}
-                      className="sephora-gradient text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2"
+                      className="btn-primary flex items-center space-x-3 mx-auto text-lg px-8 py-4"
                     >
-                      <ArrowUp className="h-5 w-5" />
+                      <Gem className="h-6 w-6" />
                       <span>Add Your First Product</span>
                     </motion.button>
                   )}
