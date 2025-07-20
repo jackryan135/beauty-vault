@@ -2,7 +2,7 @@ import { NextApiRequest, NextApiResponse } from 'next'
 import { authQuery } from '../../../../lib/auth-db'
 import { requireAdmin } from '../../../../lib/auth'
 
-async function handler(req: NextApiRequest, res: NextApiResponse, user: any) {
+async function handler(req: NextApiRequest, res: NextApiResponse, user: { id: string; role: string }) {
   const { id } = req.query
 
   if (!id || typeof id !== 'string') {

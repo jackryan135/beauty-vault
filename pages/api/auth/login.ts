@@ -62,7 +62,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Check if guest user exists
-      let guestResult = await authQuery(
+      const guestResult = await authQuery(
         'SELECT * FROM users WHERE name = $1 AND role = $2',
         [name.trim(), 'guest']
       )

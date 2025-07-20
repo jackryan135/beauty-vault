@@ -24,7 +24,7 @@ interface CheckoutHistorySummary {
 interface CheckoutHistoryModalProps {
   isOpen: boolean
   onClose: () => void
-  user: any
+  user: { id: string; name: string; role: string }
 }
 
 export default function CheckoutHistoryModal({
@@ -116,7 +116,7 @@ export default function CheckoutHistoryModal({
                       My Checkout History
                     </h2>
                     <p className="text-blue-100 text-sm">
-                      All products you've checked out over time
+                      All products you&apos;ve checked out over time
                     </p>
                   </div>
                 </div>

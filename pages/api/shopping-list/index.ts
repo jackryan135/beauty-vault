@@ -3,7 +3,7 @@ import { authQuery } from '../../../lib/auth-db'
 import { requireAuth } from '../../../lib/auth'
 import { ShoppingListRequest } from '../../../types/product'
 
-async function handler(req: NextApiRequest, res: NextApiResponse, user: any) {
+async function handler(req: NextApiRequest, res: NextApiResponse, user: { id: string; name: string }) {
   if (req.method === 'GET') {
     // Get user's shopping list
     try {
@@ -75,7 +75,7 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: any) {
       }
 
       // Get or create shopping list for user
-      let listResult = await authQuery(
+      const listResult = await authQuery(
         'SELECT * FROM shopping_lists WHERE user_id = $1 AND is_active = true',
         [user.id]
       )

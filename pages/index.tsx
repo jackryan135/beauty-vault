@@ -27,7 +27,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [isClearing, setIsClearing] = useState(false)
-  const [editingData, setEditingData] = useState<{ [key: string]: any }>({})
+  const [editingData, setEditingData] = useState<{ [key: string]: Record<string, string | number | boolean> }>({})
   const [shoppingList, setShoppingList] = useState<ShoppingList | null>(null)
   const [allShoppingLists, setAllShoppingLists] = useState<ShoppingList[]>([])
   const [loginLoading, setLoginLoading] = useState(false)
@@ -532,14 +532,19 @@ export default function Home() {
     setEditingData({})
   }
 
-  const handleEditingChange = (productId: string, field: string, value: any) => {
+  const handleEditingChange = (productId: string, field: string, value: string | number | boolean) => {
     setEditingData(prev => ({
       ...prev,
       [productId]: {
-        ...prev[productId],
+        ...(prev[productId] || {}),
         [field]: value
       }
     }))
+  }
+
+  const getEditedImageUrl = (productId: string): string | undefined => {
+    const productData = editingData[productId]
+    return productData?.image_url as string | undefined
   }
 
   const handleUpdateProduct = async (updatedProduct: Partial<Product>) => {
@@ -784,7 +789,7 @@ export default function Home() {
                 <Palette className="h-12 w-12 text-white" />
               </div>
               <h3 className="text-xl font-elegant font-semibold text-gray-800 mb-2">
-                Welcome to Olivia's Beauty Vault
+                Welcome to Olivia&apos;s Beauty Vault
               </h3>
               <p className="text-gray-600 mb-6">
                 Please log in to view and manage products.
@@ -823,7 +828,7 @@ export default function Home() {
                         onViewDetails={handleViewDetails}
                         onStatusChange={handleStatusChange}
                         onAddToShoppingList={handleAddToShoppingList}
-                        editedImageUrl={editingData[product.id]?.image_url}
+                        editedImageUrl={getEditedImageUrl(product.id)}
                         isGuest={true}
                       />
                     ))}

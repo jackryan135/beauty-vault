@@ -84,7 +84,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
                 </div>
                 <div>
                   <h2 className="text-2xl font-elegant font-bold">
-                    Olivia's Beauty Vault
+                    Olivia&apos;s Beauty Vault
                   </h2>
                   <p className="text-sephora-100 text-sm">
                     {isGuestMode ? 'Guest Access' : 'Admin Access'}

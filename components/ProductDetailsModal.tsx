@@ -9,7 +9,7 @@ interface ProductDetailsModalProps {
   onClose: () => void
   product: Product | null
   onSave: (updatedProduct: Partial<Product>) => void
-  onEditingChange?: (field: string, value: any) => void
+  onEditingChange?: (field: string, value: string | number | boolean) => void
 }
 
 interface FormData {
