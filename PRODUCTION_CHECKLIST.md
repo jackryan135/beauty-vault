@@ -33,7 +33,7 @@
 - [ ] `.npmrc` file is configured for production
 - [ ] Vercel uses `npm ci` for installation
 - [ ] All dependencies are properly listed in package.json
-- [ ] TypeScript scripts use local installation correctly ✅ FIXED
+- [ ] TypeScript scripts use direct node execution ✅ FIXED
 
 ## 🚀 Deployment Steps
 
@@ -107,13 +107,13 @@ vercel --prod
 - ✅ Verified all dependencies are properly listed in package.json
 
 #### GitHub Actions TypeScript Issues (FIXED ✅)
-**Issue**: "This is not the tsc command you are looking for" or "tsc: not found"
+**Issue**: "This is not the tsc command you are looking for" or "npx canceled due to missing packages"
 **Solution**:
-- ✅ Updated `package.json` script to use `npx --no-install tsc --noEmit`
+- ✅ Updated `package.json` script to use `node node_modules/typescript/bin/tsc --noEmit`
 - ✅ Updated GitHub Actions workflow to use `npm run type-check`
 - ✅ Fixed build verification script to use npm scripts
 - ✅ Ensured TypeScript is properly installed as devDependency
-- ✅ Used `--no-install` flag to prevent npx from installing global packages
+- ✅ Used direct node execution to avoid npx package resolution issues
 
 #### Database Connection Failed
 - Check `POSTGRES_URL` format
@@ -200,10 +200,10 @@ If you encounter issues:
 - ✅ **Verified all dependencies** are properly configured
 
 ### GitHub Actions Fix
-- ✅ **Fixed TypeScript script** to use `npx --no-install tsc --noEmit`
+- ✅ **Fixed TypeScript script** to use `node node_modules/typescript/bin/tsc --noEmit`
 - ✅ **Updated GitHub Actions workflow** to use `npm run type-check`
 - ✅ **Fixed build verification script** to use npm scripts
 - ✅ **Ensured consistent TypeScript usage** across all environments
-- ✅ **Used --no-install flag** to prevent npx from installing global packages
+- ✅ **Used direct node execution** to avoid npx package resolution issues
 
 The build should now work correctly on both Vercel and GitHub Actions! 
