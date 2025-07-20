@@ -33,6 +33,7 @@
 - [ ] `.npmrc` file is configured for production
 - [ ] Vercel uses `npm ci` for installation
 - [ ] All dependencies are properly listed in package.json
+- [ ] TypeScript scripts use `npx tsc` correctly ✅ FIXED
 
 ## 🚀 Deployment Steps
 
@@ -105,6 +106,14 @@ vercel --prod
 - ✅ Added `.npmrc` file for consistent package installation
 - ✅ Verified all dependencies are properly listed in package.json
 
+#### GitHub Actions TypeScript Issues (FIXED ✅)
+**Issue**: "This is not the tsc command you are looking for"
+**Solution**:
+- ✅ Updated `package.json` script to use `npx tsc --noEmit`
+- ✅ Updated GitHub Actions workflow to use `npm run type-check`
+- ✅ Fixed build verification script to use npm scripts
+- ✅ Ensured TypeScript is properly installed as devDependency
+
 #### Database Connection Failed
 - Check `POSTGRES_URL` format
 - Verify database is accessible from Vercel
@@ -164,6 +173,7 @@ Your deployment is successful when:
 - ✅ Images load and are optimized
 - ✅ No console errors in production
 - ✅ Build process completes without TypeScript/ESLint errors
+- ✅ GitHub Actions CI passes successfully
 
 ## 📞 Support
 
@@ -188,4 +198,10 @@ If you encounter issues:
 - ✅ **Created build verification script** for local testing
 - ✅ **Verified all dependencies** are properly configured
 
-The build should now work correctly on Vercel! 
+### GitHub Actions Fix
+- ✅ **Fixed TypeScript script** to use `npx tsc --noEmit`
+- ✅ **Updated GitHub Actions workflow** to use `npm run type-check`
+- ✅ **Fixed build verification script** to use npm scripts
+- ✅ **Ensured consistent TypeScript usage** across all environments
+
+The build should now work correctly on both Vercel and GitHub Actions! 

@@ -13,7 +13,7 @@ fi
 
 # Check TypeScript
 echo "🔧 Checking TypeScript..."
-npx tsc --noEmit
+npm run type-check
 
 # Check ESLint
 echo "🔍 Running ESLint..."
