@@ -29,15 +29,19 @@ The application will automatically use the mock database for development.
 
 ## 🎯 Features
 
+- ✅ **Password-based authentication** with admin and guest roles
 - ✅ **Add products to vault** by SKU with AI-generated product info
 - ✅ **Scan products in** (increase quantity for duplicates)
 - ✅ **Scan products out** (decrease quantity by 1)
 - ✅ **Search and filter** products
+- ✅ **Guest shopping lists** with personal management
+- ✅ **Admin shopping list oversight** and management
 - ✅ **Beautiful Sephora-inspired UI** with animations
 - ✅ **Real-time notifications** for all actions
 - ✅ **Responsive design** for all devices
 - ✅ **Multiple image sources** with CORS checking
 - ✅ **Intelligent product fetching** from multiple APIs
+- ✅ **Session persistence** (2-hour login sessions)
 
 ## 🛠️ Tech Stack
 
@@ -59,9 +63,23 @@ Inspired by Sephora's elegant design language:
 - **Animations**: Smooth transitions and micro-interactions
 - **Icons**: Beauty-focused (palette, heart, sparkles)
 
+## 🔐 Authentication
+
+### Admin Access
+- **Name**: `Olivia`
+- **Password**: `wally`
+- **Features**: Full access to all vault features
+- **Shopping Lists**: Can view and manage all guest shopping lists
+
+### Guest Access
+- **Password**: `winnie`
+- **Features**: View products on shelf only
+- **Shopping Lists**: Create and manage personal shopping list
+- **Session**: 2-hour persistence
+
 ## 📱 Usage
 
-### Adding Products
+### Adding Products (Admin Only)
 1. Click "Add to Vault" button
 2. Enter product SKU
 3. AI generates product information
@@ -76,6 +94,17 @@ Inspired by Sephora's elegant design language:
 1. Click "Scan Out by SKU" button
 2. Enter product SKU
 3. Product quantity decreases by 1
+
+### Shopping Lists (Guests)
+1. Add products to personal shopping list
+2. Edit quantities and remove items
+3. Check out individual items or entire list
+
+### Shopping List Management (Admins)
+1. View all active shopping lists with guest names
+2. Check out items from any list
+3. Clear entire shopping lists
+4. Dismiss individual requests
 
 ## 🚀 Deployment
 
@@ -98,8 +127,8 @@ npm start
 ## 📚 Documentation
 
 - **[SETUP.md](./SETUP.md)** - Detailed setup and configuration instructions
+- **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** - Comprehensive Vercel deployment guide with authentication system
 - **[DEVELOPMENT.md](./DEVELOPMENT.md)** - Development guide, architecture, and technical details
-- **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** - Vercel deployment guide
 - **[CONTRIBUTING.md](./CONTRIBUTING.md)** - How to contribute to the project
 - **[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)** - Community guidelines
 - **[SECURITY.md](./SECURITY.md)** - Security policy and reporting

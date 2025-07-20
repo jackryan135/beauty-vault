@@ -47,6 +47,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       console.log('Fetching products from database...')
       const { rows } = await db.query('SELECT * FROM products ORDER BY created_at DESC')
       console.log(`Found ${rows.length} products`)
+      
+      // Set cache control headers to prevent caching
+      res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate')
+      res.setHeader('Pragma', 'no-cache')
+      res.setHeader('Expires', '0')
+      
       res.status(200).json(rows)
     } catch (error) {
       console.error('Error fetching products:', error)
@@ -70,9 +76,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         const newEntryCount = (product.metadata?.entry_count || 0) + 1
         const newQuantity = product.quantity + 1
 
+        // Determine new status based on quantity
+        const newStatus = newQuantity > 0 ? 'in_vault' : 'used_up'
+        
         const { rows } = await db.query(
-          'UPDATE products SET quantity = $1, is_active = $2, metadata = $3, updated_at = NOW() WHERE sku = $4 RETURNING *',
-          [newQuantity, true, { ...product.metadata, entry_count: newEntryCount }, sku]
+          'UPDATE products SET quantity = $1, is_active = $2, status = $3, metadata = $4, updated_at = NOW() WHERE sku = $5 RETURNING *',
+          [newQuantity, true, newStatus, { ...product.metadata, entry_count: newEntryCount }, sku]
         )
 
         return res.status(200).json({

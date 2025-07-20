@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, Palette, Star, Users, Package, AlertCircle, Settings, Lock, Share2 } from 'lucide-react'
+import { Heart, Palette, Star, Users, Package, AlertCircle, Settings, Lock, Share2, ShoppingCart } from 'lucide-react'
 import { Product } from '../types/product'
 import { getFallbackImage, getDisplayImageUrl } from '../lib/image-fallback'
 
@@ -11,7 +11,9 @@ interface ProductCardProps {
   onUseProduct: (id: string) => void
   onViewDetails?: (product: Product) => void
   onStatusChange?: (id: string, status: 'in_vault' | 'on_shelf') => void
+  onAddToShoppingList?: (productId: string) => void
   editedImageUrl?: string | null
+  isGuest?: boolean
 }
 
 const ProductCard: React.FC<ProductCardProps> = ({ 
@@ -19,7 +21,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
   onUseProduct, 
   onViewDetails, 
   onStatusChange,
-  editedImageUrl 
+  onAddToShoppingList,
+  editedImageUrl,
+  isGuest = false
 }) => {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
@@ -300,21 +304,36 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {/* Action Buttons */}
         {isActive && product.quantity > 0 && (
           <div className="space-y-3">
-            {/* Check out Button */}
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
-              onClick={() => onUseProduct(product.id)}
-              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 px-4 rounded-xl font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-md hover:shadow-lg"
-            >
-              <div className="flex items-center justify-center gap-2">
-                <Heart className="w-4 h-4" />
-                Check out
-              </div>
-            </motion.button>
+            {isGuest ? (
+              // Guest view - show shopping list button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onAddToShoppingList?.(product.id)}
+                className="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 px-4 rounded-xl font-medium hover:from-rose-600 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <ShoppingCart className="w-4 h-4" />
+                  Add to Shopping List
+                </div>
+              </motion.button>
+            ) : (
+              // Admin view - show check out button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={() => onUseProduct(product.id)}
+                className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 px-4 rounded-xl font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-md hover:shadow-lg"
+              >
+                <div className="flex items-center justify-center gap-2">
+                  <Heart className="w-4 h-4" />
+                  Check out
+                </div>
+              </motion.button>
+            )}
 
-            {/* Status Change Button */}
-            {getStatusButton()}
+            {/* Status Change Button - only for admin */}
+            {!isGuest && getStatusButton()}
           </div>
         )}
 
