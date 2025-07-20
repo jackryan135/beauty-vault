@@ -7,7 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
   },
   "keywords": [
     "beauty",
@@ -15,7 +16,7 @@
     "olivia-ryan",
     "nextjs"
   ],
-  "author": "Olivia Ryan",
+  "author": "Jack Ryan",
   "license": "MIT",
   "dependencies": {
     "@google/generative-ai": "^0.24.1",
@@ -23,17 +24,21 @@
     "lucide-react": "^0.263.1",
     "next": "^11.1.4",
     "pg": "^7.18.2",
-    "react": "^17.0.2",
-    "react-dom": "^17.0.2",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
     "react-hot-toast": "^2.4.0",
     "tailwindcss": "^2.2.19",
     "typescript": "^4.5.4"
   },
   "devDependencies": {
     "@types/node": "^16.18.0",
-    "@types/react": "^17.0.38",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
     "@types/pg": "^7.14.9",
     "autoprefixer": "^10.4.14",
     "postcss": "^8.4.24"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }

@@ -2,13 +2,14 @@ import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Save, Edit3, Image as ImageIcon } from 'lucide-react'
 import { Product } from '../types/product'
-import { getFallbackImage } from '../lib/image-fallback'
+import { getFallbackImage, getDisplayImageUrl } from '../lib/image-fallback'
 
 interface ProductDetailsModalProps {
   isOpen: boolean
   onClose: () => void
   product: Product | null
   onSave: (updatedProduct: Partial<Product>) => void
+  onEditingChange?: (field: string, value: any) => void
 }
 
 interface FormData {
@@ -25,7 +26,8 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   isOpen,
   onClose,
   product,
-  onSave
+  onSave,
+  onEditingChange
 }) => {
   const [formData, setFormData] = useState<FormData>({
     name: '',
@@ -86,6 +88,11 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
       ...prev,
       [field]: value
     }))
+    
+    // Notify parent component of editing changes
+    if (onEditingChange && product) {
+      onEditingChange(field, value)
+    }
   }
 
   if (!product) return null
@@ -148,13 +155,13 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                     </label>
                     <div className="relative">
                       <img
-                        src={formData.image_url || product.image_url}
+                        src={getDisplayImageUrl(product.image_url, formData.image_url, formData.name || product.name)}
                         alt={formData.name || product.name}
                         className="w-full h-48 object-cover rounded-lg border border-gray-200"
-                                                  onError={(e) => {
-                            const target = e.target as HTMLImageElement
-                            target.src = getFallbackImage(formData.name || 'Product')
-                          }}
+                        onError={(e) => {
+                          const target = e.target as HTMLImageElement
+                          target.src = getFallbackImage(formData.name || 'Product')
+                        }}
                       />
                       {isEditing && (
                         <div className="mt-2">

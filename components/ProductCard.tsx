@@ -1,18 +1,19 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Heart, Palette, Star, Users, Package, AlertCircle, Settings } from 'lucide-react'
 import { Product } from '../types/product'
-import { getFallbackImage, getBestImageUrl, isReliableImageUrl } from '../lib/image-fallback'
+import { getFallbackImage, getDisplayImageUrl } from '../lib/image-fallback'
 
 interface ProductCardProps {
   product: Product
   onUseProduct: (id: string) => void
   onViewDetails?: (product: Product) => void
+  editedImageUrl?: string | null
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onViewDetails }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onViewDetails, editedImageUrl }) => {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
   const isActive = product.is_active
@@ -20,13 +21,18 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onView
   const isFound = metadata.source === 'real_data' || metadata.found === true
   
   // Debug logging
-  const bestImageUrl = getBestImageUrl(product.image_url || '', product.name)
-  const isUsingFallback = bestImageUrl !== product.image_url
+  useEffect(() => {
+    console.log('ProductCard mounted:', {
+      name: product.name,
+      originalImageUrl: product.image_url,
+      isFound,
+      source: metadata.source
+    })
+  }, [product.name, product.image_url, isFound, metadata.source])
+  
   console.log('ProductCard render:', {
     name: product.name,
     originalImageUrl: product.image_url,
-    bestImageUrl: bestImageUrl,
-    isUsingFallback: isUsingFallback,
     isFound,
     source: metadata.source,
     imageLoaded,
@@ -54,50 +60,38 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onView
           </div>
         )}
         
-        {/* Error State - Show fallback image */}
-        {imageError && (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-200 to-rose-200 relative z-10">
-            <div className="text-center">
-              <Package className="w-12 h-12 text-pink-400 mx-auto mb-2" />
-              <p className="text-sm text-pink-600 font-medium px-2">{product.name}</p>
-              <p className="text-xs text-pink-500 mt-1">Fallback Image</p>
-            </div>
-          </div>
-        )}
+        {/* Product Image */}
+        <img
+          src={getDisplayImageUrl(product.image_url, editedImageUrl, product.name)}
+          alt={product.name}
+          className={`w-full h-full object-cover transition-all duration-300 hover:scale-105 relative z-10 ${
+            imageLoaded ? 'opacity-100' : 'opacity-0'
+          }`}
+          onLoad={() => {
+            console.log('Image loaded successfully:', {
+              originalUrl: product.image_url,
+              editedUrl: editedImageUrl,
+              productName: product.name
+            })
+            setImageLoaded(true)
+            setImageError(false)
+          }}
+          onError={(e) => {
+            console.log('Image failed to load:', {
+              originalUrl: product.image_url,
+              editedUrl: editedImageUrl,
+              productName: product.name
+            })
+            const target = e.target as HTMLImageElement
+            target.src = getFallbackImage(product.name)
+            setImageError(true)
+            setImageLoaded(false)
+          }}
+          loading="lazy"
+          crossOrigin="anonymous"
+        />
         
-        {/* Product Image - Only show if loaded successfully */}
-        {!imageError && (
-          <img
-            src={getBestImageUrl(product.image_url || '', product.name)}
-            alt={product.name}
-            className={`w-full h-full object-cover transition-all duration-300 hover:scale-105 relative z-10 ${
-              imageLoaded ? 'opacity-100' : 'opacity-0'
-            }`}
-            onLoad={() => {
-              console.log('Image loaded successfully:', product.image_url)
-              setImageLoaded(true)
-              setImageError(false)
-            }}
-            onError={(e) => {
-              console.log('Image failed to load:', product.image_url)
-              setImageError(true)
-              setImageLoaded(false)
-            }}
-            loading="lazy"
-            crossOrigin="anonymous"
-          />
-        )}
-        
-        {/* Fallback placeholder when no image URL is provided */}
-        {!product.image_url && !imageLoaded && !imageError && (
-          <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-pink-200 to-rose-200 relative z-10">
-            <div className="text-center">
-              <Package className="w-12 h-12 text-pink-400 mx-auto mb-2" />
-              <p className="text-sm text-pink-600 font-medium px-2">{product.name}</p>
-              <p className="text-xs text-pink-500 mt-1">No Image</p>
-            </div>
-          </div>
-        )}
+
         
         {/* Gradient overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-0" />
@@ -120,12 +114,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onView
           {isFound ? 'Product Found' : 'Not Found'}
         </div>
 
-        {/* Fallback Indicator */}
-        {isUsingFallback && (
-          <div className="absolute top-3 left-16 px-2 py-1 rounded-full text-xs font-medium bg-yellow-500 text-white z-20">
-            Fallback
-          </div>
-        )}
+
 
         {/* Details Button */}
         {onViewDetails && (

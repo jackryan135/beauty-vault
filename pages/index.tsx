@@ -18,6 +18,7 @@ export default function Home() {
   const [searchTerm, setSearchTerm] = useState('')
   const [loading, setLoading] = useState(true)
   const [isClearing, setIsClearing] = useState(false)
+  const [editingData, setEditingData] = useState<{ [key: string]: any }>({})
 
   useEffect(() => {
     fetchProducts()
@@ -166,6 +167,18 @@ export default function Home() {
   const handleViewDetails = (product: Product) => {
     setSelectedProduct(product)
     setIsDetailsModalOpen(true)
+    // Clear any previous editing data
+    setEditingData({})
+  }
+
+  const handleEditingChange = (productId: string, field: string, value: any) => {
+    setEditingData(prev => ({
+      ...prev,
+      [productId]: {
+        ...prev[productId],
+        [field]: value
+      }
+    }))
   }
 
   const handleUpdateProduct = async (updatedProduct: Partial<Product>) => {
@@ -314,6 +327,7 @@ export default function Home() {
                         product={product}
                         onUseProduct={handleScanOut}
                         onViewDetails={handleViewDetails}
+                        editedImageUrl={editingData[product.id]?.image_url}
                       />
                     ))}
                   </div>
@@ -340,6 +354,7 @@ export default function Home() {
                         product={product}
                         onUseProduct={handleScanOut}
                         onViewDetails={handleViewDetails}
+                        editedImageUrl={editingData[product.id]?.image_url}
                       />
                     ))}
                   </div>
@@ -402,9 +417,12 @@ export default function Home() {
           onClose={() => {
             setIsDetailsModalOpen(false)
             setSelectedProduct(null)
+            setEditingData({})
           }}
           product={selectedProduct}
           onSave={handleUpdateProduct}
+          onEditingChange={selectedProduct ? (field: string, value: any) => 
+            handleEditingChange(selectedProduct.id, field, value) : undefined}
         />
       </div>
     </>

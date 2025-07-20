@@ -18,6 +18,7 @@ interface Product {
  * Database configuration and connection management
  */
 const isDevelopment = process.env.NODE_ENV === 'development'
+const isProduction = process.env.NODE_ENV === 'production'
 const useLocalDB = process.env.USE_LOCAL_DB === 'true'
 
 let pool: Pool | null = null
@@ -38,12 +39,29 @@ function initializeDB() {
       ssl: false,
     })
   } else if (process.env.POSTGRES_URL) {
-    pool = new Pool({
+    // Production database configuration
+    const config: any = {
       connectionString: process.env.POSTGRES_URL,
-      ssl: {
+    }
+    
+    // SSL configuration for production
+    if (isProduction) {
+      config.ssl = {
+        rejectUnauthorized: false,
+        ca: process.env.POSTGRES_CA_CERT,
+      }
+    } else {
+      config.ssl = {
         rejectUnauthorized: false
       }
-    })
+    }
+    
+    // Connection pooling configuration
+    config.max = 20 // Maximum number of clients in the pool
+    config.idleTimeoutMillis = 30000 // Close idle clients after 30 seconds
+    config.connectionTimeoutMillis = 2000 // Return an error after 2 seconds if connection could not be established
+    
+    pool = new Pool(config)
   } else {
     console.log('No database configuration found, using mock database')
     return null

@@ -117,6 +117,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - Inspired by Sephora's elegant design language
 - Built with Next.js, TypeScript, and Tailwind CSS
 - AI integration powered by Google Gemini
+- Created by Jack Ryan for Olivia's Beauty Vault
 
 ## 🎉 Success!
 

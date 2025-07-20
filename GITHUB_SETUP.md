@@ -66,8 +66,8 @@ Before pushing to GitHub, ensure you have:
 ## 🔗 Connect Local Repository to GitHub
 
 ```bash
-# Add remote origin (replace 'yourusername' with your GitHub username)
-git remote add origin https://github.com/yourusername/product-catalog.git
+# Add remote origin
+git remote add origin https://github.com/jackryan135/beauty-vault.git
 
 # Push to GitHub
 git push -u origin main
@@ -98,32 +98,32 @@ After creating the repository, update these files with your information:
 
 ### 1. README.md
 ```markdown
-git clone https://github.com/yourusername/product-catalog.git
+git clone https://github.com/jackryan135/beauty-vault.git
 ```
 
 ### 2. .github/dependabot.yml
 ```yaml
 reviewers:
-  - "yourusername"
+  - "jackryan135"
 assignees:
-  - "yourusername"
+  - "jackryan135"
 ```
 
 ### 3. .github/FUNDING.yml
 ```yaml
-github: [yourusername]
+github: [jackryan135]
 ```
 
 ### 4. SECURITY.md
 ```markdown
-If you discover a security vulnerability within this project, please send an email to your-email@example.com.
+If you discover a security vulnerability within this project, please send an email to jackryan135@gmail.com.
 ```
 
 ### 5. CODE_OF_CONDUCT.md
 ```markdown
 Instances of abusive, harassing, or otherwise unacceptable behavior may be
 reported to the community leaders responsible for enforcement at
-your-email@example.com.
+jackryan135@gmail.com.
 ```
 
 ## 🎯 Post-Setup Tasks

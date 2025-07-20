@@ -1,4 +1,27 @@
 /**
+ * Gets the correct image URL for display
+ * This ensures consistency between ProductCard and ProductDetailsModal
+ */
+export function getDisplayImageUrl(
+  storedImageUrl: string | null | undefined, 
+  editedImageUrl?: string | null,
+  productName: string = 'Product'
+): string {
+  // If there's an edited image URL, use it
+  if (editedImageUrl) {
+    return editedImageUrl
+  }
+  
+  // If there's a stored image URL, use it
+  if (storedImageUrl) {
+    return storedImageUrl
+  }
+  
+  // Otherwise, use fallback
+  return getFallbackImage(productName)
+}
+
+/**
  * Generates fallback image URLs using placeholder services
  */
 export function generateFallbackImage(text: string, width: number = 400, height: number = 400): string {
@@ -42,16 +65,25 @@ export function getFallbackImage(text: string, width: number = 400, height: numb
  */
 export function isReliableImageUrl(url: string): boolean {
   if (!url) return false
-  return true
+  
+  // Check if it's a valid URL format
+  try {
+    new URL(url)
+    return true
+  } catch {
+    return false
+  }
 }
 
 /**
  * Gets the best available image URL
  */
 export function getBestImageUrl(primaryUrl: string, fallbackText: string): string {
+  // If we have a valid URL, use it
   if (isReliableImageUrl(primaryUrl)) {
     return primaryUrl
   }
   
+  // Otherwise, generate a fallback image
   return getFallbackImage(fallbackText)
 } 
