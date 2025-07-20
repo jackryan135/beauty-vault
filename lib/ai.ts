@@ -275,6 +275,63 @@ async function searchForBasicProduct(sku: string): Promise<AIProductInfo> {
 }
 
 /**
+ * Enriches product information using AI when we have basic name/brand from barcode lookup
+ */
+export async function enrichProductInfo(name: string, brand: string): Promise<{
+  description?: string
+  price?: number
+  size?: string
+  category?: string
+  ingredients?: string[]
+}> {
+  try {
+    if (!genAI || !process.env.GEMINI_API_KEY) {
+      return {}
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite-preview-06-17' })
+    
+    const prompt = `I have a beauty product with name: "${name}" and brand: "${brand}". 
+
+Please provide additional information about this product. Return ONLY a valid JSON object with the following structure:
+
+{
+  "description": "A brief, accurate description of what this product is and what it does",
+  "price": 25.99,
+  "size": "1 oz",
+  "category": "Skincare",
+  "ingredients": ["ingredient1", "ingredient2", "ingredient3"]
+}
+
+Rules:
+- Only include fields where you can provide accurate information
+- For price, provide a reasonable retail price in USD (0 if unknown)
+- For size, extract from the product name or provide a common size for this type of product
+- For category, choose from: Skincare, Makeup, Hair Care, Fragrance, Body Care, Tools & Accessories, Beauty
+- For ingredients, only include if you're confident about the actual ingredients
+- If you're not sure about any field, omit it from the JSON
+- Keep descriptions concise and accurate
+- Do not invent information you're not confident about
+
+If you cannot find reliable information about this specific product, return an empty object: {}`
+
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const text = response.text()
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      const enrichedInfo = JSON.parse(jsonMatch[0])
+      return enrichedInfo
+    }
+  } catch (error) {
+    console.error('AI enrichment error:', error)
+  }
+  
+  return {}
+}
+
+/**
  * Simple hash function for deterministic operations
  */
 function simpleHash(str: string): number {

@@ -1,4 +1,4 @@
-import { generateProductInfo } from './ai'
+import { generateProductInfo, enrichProductInfo } from './ai'
 import { cleanProductInfo, extractSizeFromTitle } from './text-cleaner'
 import { getBestImageUrl } from './image-sources'
 
@@ -130,14 +130,32 @@ export class ProductFetcher {
         // Extract size from title if not already present
         const { size: extractedSize } = extractSizeFromTitle(item.title || '')
         
+        // Try to enrich with AI if we have basic info but missing details
+        let enrichedInfo: {
+          description?: string
+          price?: number
+          size?: string
+          category?: string
+          ingredients?: string[]
+        } = {}
+        if (cleaned.name && cleaned.brand && (!cleaned.description || item.offers?.[0]?.price === 0)) {
+          try {
+            console.log(`Enriching product info with AI: ${cleaned.name} by ${cleaned.brand}`)
+            enrichedInfo = await enrichProductInfo(cleaned.name, cleaned.brand)
+          } catch (error) {
+            console.log('AI enrichment failed, using basic info:', error)
+          }
+        }
+        
         return {
           name: cleaned.name,
           brand: cleaned.brand,
-          price: item.offers?.[0]?.price || 0,
+          price: item.offers?.[0]?.price || enrichedInfo.price || 0,
           image_url: imageUrl,
-          description: cleaned.description,
-          category: this.determineCategory(cleaned.name) || this.mapCategory(item.category),
-          size: extractedSize || this.generateSize(),
+          description: cleaned.description || enrichedInfo.description,
+          category: this.determineCategory(cleaned.name) || this.mapCategory(item.category) || enrichedInfo.category,
+          size: extractedSize || enrichedInfo.size || this.generateSize(),
+          ingredients: enrichedInfo.ingredients,
           found: true
         }
       }
@@ -175,14 +193,32 @@ export class ProductFetcher {
         // Extract size from title if not already present
         const { size: extractedSize } = extractSizeFromTitle(product.product_name || '')
         
+        // Try to enrich with AI since Open Food Facts doesn't provide pricing
+        let enrichedInfo: {
+          description?: string
+          price?: number
+          size?: string
+          category?: string
+          ingredients?: string[]
+        } = {}
+        if (cleaned.name && cleaned.brand) {
+          try {
+            console.log(`Enriching Open Food Facts product with AI: ${cleaned.name} by ${cleaned.brand}`)
+            enrichedInfo = await enrichProductInfo(cleaned.name, cleaned.brand)
+          } catch (error) {
+            console.log('AI enrichment failed, using basic info:', error)
+          }
+        }
+        
         return {
           name: cleaned.name,
           brand: cleaned.brand,
-          price: 0, // Open Food Facts doesn't provide pricing
+          price: enrichedInfo.price || 0,
           image_url: imageUrl,
-          description: cleaned.description,
-          category: this.determineCategory(cleaned.name) || this.mapCategory(product.categories_tags?.[0]),
-          size: extractedSize || this.generateSize(),
+          description: cleaned.description || enrichedInfo.description,
+          category: this.determineCategory(cleaned.name) || this.mapCategory(product.categories_tags?.[0]) || enrichedInfo.category,
+          size: extractedSize || enrichedInfo.size || this.generateSize(),
+          ingredients: enrichedInfo.ingredients,
           found: true
         }
       }
@@ -220,14 +256,32 @@ export class ProductFetcher {
         // Extract size from title if not already present
         const { size: extractedSize } = extractSizeFromTitle(product.title || '')
         
+        // Try to enrich with AI if we have basic info but missing details
+        let enrichedInfo: {
+          description?: string
+          price?: number
+          size?: string
+          category?: string
+          ingredients?: string[]
+        } = {}
+        if (cleaned.name && cleaned.brand && (!cleaned.description || !product.lowest_recorded_price)) {
+          try {
+            console.log(`Enriching Barcode Lookup product with AI: ${cleaned.name} by ${cleaned.brand}`)
+            enrichedInfo = await enrichProductInfo(cleaned.name, cleaned.brand)
+          } catch (error) {
+            console.log('AI enrichment failed, using basic info:', error)
+          }
+        }
+        
         return {
           name: cleaned.name,
           brand: cleaned.brand,
-          price: parseFloat(product.lowest_recorded_price) || 0,
+          price: parseFloat(product.lowest_recorded_price) || enrichedInfo.price || 0,
           image_url: imageUrl,
-          description: cleaned.description,
-          category: this.determineCategory(cleaned.name) || this.mapCategory(product.category),
-          size: extractedSize || this.generateSize(),
+          description: cleaned.description || enrichedInfo.description,
+          category: this.determineCategory(cleaned.name) || this.mapCategory(product.category) || enrichedInfo.category,
+          size: extractedSize || enrichedInfo.size || this.generateSize(),
+          ingredients: enrichedInfo.ingredients,
           found: true
         }
       }
