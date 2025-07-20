@@ -84,7 +84,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
                   />
                 </div>
                 <p className="mt-2 text-sm text-gray-500">
-                  We'll automatically generate product details for your collection
+                  We&apos;ll automatically generate product details for your collection
                 </p>
               </div>
 

@@ -73,7 +73,7 @@ function initializeDB() {
 /**
  * Mock database for development when no real DB is configured
  */
-let mockProducts: Product[] = []
+const mockProducts: Product[] = []
 
 /**
  * Database interface with query and transaction support

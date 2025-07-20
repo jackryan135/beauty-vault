@@ -225,8 +225,8 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Olivia's Beauty Vault - Product Management</title>
-        <meta name="description" content="Olivia Ryan's personal beauty product collection with elegant styling" />
+        <title>Olivia&apos;s Beauty Vault - Product Management</title>
+        <meta name="description" content="Olivia Ryan&apos;s personal beauty product collection with elegant styling" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
       </Head>
@@ -242,7 +242,7 @@ export default function Home() {
                 </div>
                 <div>
                   <h1 className="text-3xl font-elegant font-bold text-gradient">
-                    Olivia's Beauty Vault
+                    Olivia&apos;s Beauty Vault
                   </h1>
                   <p className="text-sephora-600 text-sm">Your personal beauty collection</p>
                 </div>
