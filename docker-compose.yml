@@ -1,0 +1,25 @@
+version: '3.3'
+
+services:
+  postgres:
+    image: postgres:13-alpine 
+    container_name: olivias_beauty_vault_db
+    environment:
+      POSTGRES_DB: olivias_beauty_vault
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+      POSTGRES_SHARED_BUFFERS: 128MB
+      POSTGRES_EFFECTIVE_CACHE_SIZE: 256MB
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data: 

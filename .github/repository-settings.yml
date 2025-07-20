@@ -1,0 +1,60 @@
+# Repository Settings Configuration
+# This file documents recommended repository settings for GitHub
+
+repository:
+  name: "product-catalog"
+  description: "A beautiful, Sephora-inspired product catalog for managing your personal beauty collection"
+  homepage: "https://yourusername.github.io/product-catalog"
+  topics:
+    - "beauty"
+    - "product-management"
+    - "nextjs"
+    - "typescript"
+    - "tailwindcss"
+    - "postgresql"
+    - "ai"
+    - "gemini"
+    - "react"
+    - "web-app"
+
+  # Repository visibility
+  private: false
+
+  # Features to enable
+  features:
+    issues: true
+    projects: true
+    wiki: false
+    discussions: true
+    packages: false
+
+  # Branch protection rules
+  branch_protection:
+    main:
+      required_status_checks:
+        strict: true
+        contexts:
+          - "ci"
+      enforce_admins: false
+      required_pull_request_reviews:
+        required_approving_review_count: 1
+        dismiss_stale_reviews: true
+        require_code_owner_reviews: false
+      restrictions: null
+
+  # Issue templates
+  issue_templates:
+    - bug_report.md
+    - feature_request.md
+
+  # Pull request template
+  pull_request_template: pull_request_template.md
+
+  # Code of conduct
+  code_of_conduct: CODE_OF_CONDUCT.md
+
+  # Contributing guidelines
+  contributing: CONTRIBUTING.md
+
+  # Security policy
+  security: SECURITY.md 
