@@ -88,7 +88,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       const productInfo = await productFetcher.fetchProduct(sku)
 
       const { rows } = await db.query(
-        'INSERT INTO products (sku, name, brand, price, image_url, quantity, is_active, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
+        'INSERT INTO products (sku, name, brand, price, image_url, quantity, is_active, status, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
         [
           sku, 
           productInfo.name, 
@@ -97,6 +97,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           productInfo.image_url, 
           1, 
           true, 
+          'in_vault',
           { 
             entry_count: 1,
             description: productInfo.description,

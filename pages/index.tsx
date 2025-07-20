@@ -224,14 +224,44 @@ export default function Home() {
     }
   }
 
+  const handleStatusChange = async (productId: string, newStatus: 'in_vault' | 'on_shelf') => {
+    try {
+      const response = await fetch(`/api/products/${productId}/update-status`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ status: newStatus }),
+      })
+
+      if (response.ok) {
+        const result = await response.json()
+        setProducts(prev => 
+          prev.map(p => 
+            p.id === productId 
+              ? { ...p, status: newStatus }
+              : p
+          )
+        )
+        toast.success(`Product moved to ${newStatus === 'in_vault' ? 'Vault' : 'Shelf'}!`)
+      } else {
+        const error = await response.json()
+        toast.error(error.message || 'Failed to update product status')
+      }
+    } catch (error) {
+      toast.error('Failed to update product status')
+    }
+  }
+
   const filteredProducts = products.filter(product =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.sku.toLowerCase().includes(searchTerm.toLowerCase()) ||
     product.brand.toLowerCase().includes(searchTerm.toLowerCase())
   )
 
-  const activeProducts = filteredProducts.filter(p => p.is_active)
-  const inactiveProducts = filteredProducts.filter(p => !p.is_active)
+  const inVaultProducts = filteredProducts.filter(p => p.status === 'in_vault' && p.is_active)
+  const onShelfProducts = filteredProducts.filter(p => p.status === 'on_shelf' && p.is_active)
+  const usedUpProducts = filteredProducts.filter(p => !p.is_active)
 
   return (
     <>
@@ -279,7 +309,7 @@ export default function Home() {
                   className="bg-rose-500 hover:bg-rose-600 text-white px-6 py-3 rounded-full font-medium flex items-center space-x-2 shadow-lg hover:shadow-xl transition-all duration-200"
                 >
                   <ArrowDown className="h-5 w-5" />
-                  <span>Use by SKU</span>
+                  <span>Check out by SKU</span>
                 </motion.button>
                 
                 <motion.button
@@ -318,8 +348,8 @@ export default function Home() {
             </div>
           ) : (
             <>
-              {/* Active Products */}
-              {activeProducts.length > 0 && (
+              {/* In Vault Products */}
+              {inVaultProducts.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -328,16 +358,17 @@ export default function Home() {
                   <div className="flex items-center space-x-3 mb-6">
                     <ShoppingBag className="h-6 w-6 text-sephora-600" />
                     <h2 className="text-2xl font-elegant font-semibold text-gray-800">
-                      In Your Vault ({activeProducts.length})
+                      In Your Vault ({inVaultProducts.length})
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {activeProducts.map((product) => (
+                    {inVaultProducts.map((product) => (
                       <ProductCard
                         key={product.id}
                         product={product}
                         onUseProduct={handleScanOut}
                         onViewDetails={handleViewDetails}
+                        onStatusChange={handleStatusChange}
                         editedImageUrl={editingData[product.id]?.image_url}
                       />
                     ))}
@@ -345,8 +376,37 @@ export default function Home() {
                 </motion.div>
               )}
 
-              {/* Inactive Products */}
-              {inactiveProducts.length > 0 && (
+              {/* On Shelf Products */}
+              {onShelfProducts.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 }}
+                  className="mb-12"
+                >
+                  <div className="flex items-center space-x-3 mb-6">
+                    <Package className="h-6 w-6 text-blue-600" />
+                    <h2 className="text-2xl font-elegant font-semibold text-gray-800">
+                      On Shelf ({onShelfProducts.length})
+                    </h2>
+                  </div>
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {onShelfProducts.map((product) => (
+                      <ProductCard
+                        key={product.id}
+                        product={product}
+                        onUseProduct={handleScanOut}
+                        onViewDetails={handleViewDetails}
+                        onStatusChange={handleStatusChange}
+                        editedImageUrl={editingData[product.id]?.image_url}
+                      />
+                    ))}
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Used Up Products */}
+              {usedUpProducts.length > 0 && (
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -355,16 +415,17 @@ export default function Home() {
                   <div className="flex items-center space-x-3 mb-6">
                     <Package className="h-6 w-6 text-gray-500" />
                     <h2 className="text-2xl font-elegant font-semibold text-gray-600">
-                      Used Up ({inactiveProducts.length})
+                      Used Up ({usedUpProducts.length})
                     </h2>
                   </div>
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                    {inactiveProducts.map((product) => (
+                    {usedUpProducts.map((product) => (
                       <ProductCard
                         key={product.id}
                         product={product}
                         onUseProduct={handleScanOut}
                         onViewDetails={handleViewDetails}
+                        onStatusChange={handleStatusChange}
                         editedImageUrl={editingData[product.id]?.image_url}
                       />
                     ))}

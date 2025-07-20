@@ -99,6 +99,11 @@ npm start
 
 - **[SETUP.md](./SETUP.md)** - Detailed setup and configuration instructions
 - **[DEVELOPMENT.md](./DEVELOPMENT.md)** - Development guide, architecture, and technical details
+- **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** - Vercel deployment guide
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - How to contribute to the project
+- **[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)** - Community guidelines
+- **[SECURITY.md](./SECURITY.md)** - Security policy and reporting
+- **[CHANGELOG.md](./CHANGELOG.md)** - Project changelog and version history
 
 ## 🤝 Contributing
 

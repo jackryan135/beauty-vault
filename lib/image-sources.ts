@@ -116,17 +116,29 @@ export async function getBestImageUrl(
  */
 function isBeautyProduct(productName: string, brand: string): boolean {
   const beautyKeywords = [
+    // Skincare
     'foundation', 'concealer', 'powder', 'blush', 'bronzer', 'highlighter',
     'eyeshadow', 'mascara', 'eyeliner', 'lipstick', 'lip gloss', 'primer',
     'moisturizer', 'cleanser', 'serum', 'toner', 'mask', 'cream', 'lotion',
-    'shampoo', 'conditioner', 'hair', 'nail', 'perfume', 'fragrance'
+    'shampoo', 'conditioner', 'hair', 'nail', 'perfume', 'fragrance',
+    'skincare', 'essence', 'eye cream', 'facial oil', 'treatment', 'sunscreen',
+    'spf', 'retinol', 'peptide', 'hyaluronic', 'vitamin c', 'niacinamide',
+    'aha', 'bha', 'exfoliant', 'face wash', 'facial cleanser', 'night cream',
+    'day cream', 'spot treatment', 'acne treatment', 'brow', 'eyebrow',
+    'setting spray', 'lip liner', 'lip balm', 'hair mask', 'hair oil',
+    'hair serum', 'hair treatment', 'hair spray', 'hair gel', 'hair cream',
+    'hair mousse', 'dry shampoo', 'body lotion', 'body wash', 'body scrub',
+    'body oil', 'hand cream', 'foot cream', 'deodorant', 'body mist',
+    'body spray', 'cologne', 'eau de toilette', 'eau de parfum', 'parfum'
   ]
   
   const beautyBrands = [
     'sephora', 'ulta', 'fenty', 'glossier', 'charlotte tilbury', 'rare beauty',
     'nars', 'mac', 'urban decay', 'anastasia', 'huda beauty', 'too faced',
     'tarte', 'bare minerals', 'benefit', 'milk makeup', 'clinique', 'estee lauder',
-    'lancome', 'dior', 'chanel', 'ysl', 'guerlain', 'shiseido', 'sk-ii'
+    'lancome', 'dior', 'chanel', 'ysl', 'guerlain', 'shiseido', 'sk-ii',
+    'la mer', 'la prairie', 'drunk elephant', 'the ordinary', 'paula\'s choice',
+    'cerave', 'neutrogena', 'olay', 'kiehl\'s', 'fresh', 'origins', 'clinique'
   ]
   
   const nameLower = productName.toLowerCase()

@@ -36,6 +36,7 @@ This guide covers the technical architecture, development practices, and impleme
 - **Mock Database**: Development fallback
 - **Transaction Support**: ACID compliance
 - **Auto-initialization**: Schema creation on startup
+- **Status Column Support**: Full support for product status tracking
 
 ### Data Flow
 
@@ -73,6 +74,23 @@ npm install
 npm run dev
 ```
 
+### Database Setup
+For local PostgreSQL development, use the consolidated setup script:
+```bash
+# Make script executable
+chmod +x scripts/setup-db.sh
+
+# Run database setup (includes status column migration)
+./scripts/setup-db.sh
+```
+
+This script handles:
+- Database creation
+- Complete table schema with status column
+- Migration of existing databases
+- Index creation
+- Data updates for existing products
+
 ### Environment Configuration
 ```env
 # Development (Mock Database)
@@ -96,25 +114,55 @@ GEMINI_API_KEY=your_gemini_api_key_here
 ### Products Table
 ```sql
 CREATE TABLE products (
-    id SERIAL PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     sku VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(500) NOT NULL,
     brand VARCHAR(255) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    price DECIMAL(10,2) NOT NULL DEFAULT 0,
     image_url TEXT,
-    quantity INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT true,
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    quantity INTEGER NOT NULL DEFAULT 1,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    status VARCHAR(20) NOT NULL DEFAULT 'in_vault' CHECK (status IN ('in_vault', 'on_shelf', 'used_up')),
+    metadata JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 ```
 
 ### Indexes
 ```sql
 CREATE INDEX idx_products_sku ON products(sku);
+CREATE INDEX idx_products_brand ON products(brand);
 CREATE INDEX idx_products_is_active ON products(is_active);
-CREATE INDEX idx_products_created_at ON products(created_at);
+CREATE INDEX idx_products_status ON products(status);
+CREATE INDEX idx_products_created_at ON products(created_at DESC);
+```
+
+### Status Column
+The `status` column tracks the current state of each product:
+- **`in_vault`**: Product is stored in the vault (default state)
+- **`on_shelf`**: Product is currently in use
+- **`used_up`**: Product has been completely used
+
+The setup script automatically handles migration of existing databases to include this column.
+
+### Triggers
+The database includes an automatic trigger to update the `updated_at` timestamp:
+```sql
+-- Function to update updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+$$ language 'plpgsql';
+
+-- Trigger to automatically update updated_at
+CREATE TRIGGER update_products_updated_at 
+    BEFORE UPDATE ON products 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
 ```
 
 ## 🔌 API Endpoints

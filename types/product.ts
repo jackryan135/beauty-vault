@@ -7,6 +7,7 @@ export interface Product {
   image_url: string
   quantity: number
   is_active: boolean
+  status: 'in_vault' | 'on_shelf' | 'used_up'
   metadata: {
     entry_count?: number
     last_used?: string

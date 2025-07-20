@@ -160,12 +160,43 @@ The application automatically:
 ### Database Scripts
 
 ```bash
-# Initialize database schema
-npm run db:init
+# Initialize database schema (includes status column migration)
+./scripts/setup-db.sh
 
 # Clear database (development only)
 curl -X POST http://localhost:3000/api/products/clear
 ```
+
+### Database Schema
+
+The setup script automatically creates the complete schema including:
+
+```sql
+CREATE TABLE products (
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    sku VARCHAR(255) UNIQUE NOT NULL,
+    name VARCHAR(500) NOT NULL,
+    brand VARCHAR(255) NOT NULL,
+    price DECIMAL(10,2) NOT NULL DEFAULT 0,
+    image_url TEXT,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    status VARCHAR(20) NOT NULL DEFAULT 'in_vault' CHECK (status IN ('in_vault', 'on_shelf', 'used_up')),
+    metadata JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+```
+
+**Status Column Values:**
+- `in_vault`: Product is stored in the vault (default)
+- `on_shelf`: Product is currently in use
+- `used_up`: Product has been completely used
+
+**Additional Features:**
+- **UUID Primary Keys**: Uses `gen_random_uuid()` for unique identifiers
+- **Automatic Timestamps**: `created_at` and `updated_at` with timezone support
+- **Trigger Function**: Automatically updates `updated_at` on row modifications
 
 ## 🖼️ Image Sources Configuration
 

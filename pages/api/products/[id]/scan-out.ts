@@ -35,16 +35,18 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(404).json({ error: 'Product not found' })
       }
 
-      const product = currentProduct[0]
+      const product = currentProduct[0] as any
       const newQuantity = Math.max(0, product.quantity - 1)
       const isActive = newQuantity > 0
+      const newStatus = isActive ? product.status : 'used_up'
 
-      // Update product quantity and status
+      // Update product quantity, status, and metadata
       const { rows } = await db.query(
-        'UPDATE products SET quantity = $1, is_active = $2, metadata = $3, updated_at = NOW() WHERE id = $4 RETURNING *',
+        'UPDATE products SET quantity = $1, is_active = $2, status = $3, metadata = $4, updated_at = NOW() WHERE id = $5 RETURNING *',
         [
           newQuantity,
           isActive,
+          newStatus,
           {
             ...product.metadata,
             last_used: new Date().toISOString(),

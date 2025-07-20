@@ -260,25 +260,46 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                         className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                       >
                         <option value="">Select category</option>
+                        {/* Skincare */}
+                        <option value="Skincare">Skincare</option>
+                        
+                        {/* Makeup - Face */}
                         <option value="Foundation">Foundation</option>
                         <option value="Concealer">Concealer</option>
                         <option value="Powder">Powder</option>
                         <option value="Blush">Blush</option>
                         <option value="Bronzer">Bronzer</option>
                         <option value="Highlighter">Highlighter</option>
+                        <option value="Primer">Primer</option>
+                        <option value="Setting Spray">Setting Spray</option>
+                        
+                        {/* Makeup - Eyes */}
                         <option value="Eyeshadow">Eyeshadow</option>
                         <option value="Mascara">Mascara</option>
                         <option value="Eyeliner">Eyeliner</option>
+                        <option value="Brow">Brow</option>
+                        <option value="Eye Primer">Eye Primer</option>
+                        
+                        {/* Makeup - Lips */}
                         <option value="Lipstick">Lipstick</option>
                         <option value="Lip Gloss">Lip Gloss</option>
-                        <option value="Moisturizer">Moisturizer</option>
-                        <option value="Cleanser">Cleanser</option>
-                        <option value="Serum">Serum</option>
-                        <option value="Mask">Face Mask</option>
+                        <option value="Lip Liner">Lip Liner</option>
+                        <option value="Lip Balm">Lip Balm</option>
+                        
+                        {/* Hair Care */}
                         <option value="Hair Care">Hair Care</option>
-                        <option value="Food & Beverage">Food & Beverage</option>
-                        <option value="Household">Household</option>
-                        <option value="Health & Wellness">Health & Wellness</option>
+                        
+                        {/* Fragrance */}
+                        <option value="Fragrance">Fragrance</option>
+                        
+                        {/* Body Care */}
+                        <option value="Body Care">Body Care</option>
+                        
+                        {/* Tools & Accessories */}
+                        <option value="Tools & Accessories">Tools & Accessories</option>
+                        
+                        {/* General */}
+                        <option value="Beauty">Beauty</option>
                         <option value="Other">Other</option>
                       </select>
                     ) : (

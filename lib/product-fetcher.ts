@@ -1,5 +1,5 @@
 import { generateProductInfo } from './ai'
-import { cleanProductInfo } from './text-cleaner'
+import { cleanProductInfo, extractSizeFromTitle } from './text-cleaner'
 import { getBestImageUrl } from './image-sources'
 
 export interface ProductData {
@@ -127,13 +127,17 @@ export class ProductFetcher {
           item.brand || 'Unknown Brand'
         )
         
+        // Extract size from title if not already present
+        const { size: extractedSize } = extractSizeFromTitle(item.title || '')
+        
         return {
           name: cleaned.name,
           brand: cleaned.brand,
-          price: parseFloat(item.lowest_recorded_price) || 0,
+          price: item.offers?.[0]?.price || 0,
           image_url: imageUrl,
           description: cleaned.description,
-          category: this.mapCategory(item.category),
+          category: this.determineCategory(cleaned.name) || this.mapCategory(item.category),
+          size: extractedSize || this.generateSize(),
           found: true
         }
       }
@@ -168,13 +172,17 @@ export class ProductFetcher {
           product.brands || 'Unknown Brand'
         )
         
+        // Extract size from title if not already present
+        const { size: extractedSize } = extractSizeFromTitle(product.product_name || '')
+        
         return {
           name: cleaned.name,
           brand: cleaned.brand,
           price: 0, // Open Food Facts doesn't provide pricing
           image_url: imageUrl,
           description: cleaned.description,
-          category: this.mapCategory(product.categories_tags?.[0]),
+          category: this.determineCategory(cleaned.name) || this.mapCategory(product.categories_tags?.[0]),
+          size: extractedSize || this.generateSize(),
           found: true
         }
       }
@@ -209,13 +217,17 @@ export class ProductFetcher {
           product.brand || 'Unknown Brand'
         )
         
+        // Extract size from title if not already present
+        const { size: extractedSize } = extractSizeFromTitle(product.title || '')
+        
         return {
           name: cleaned.name,
           brand: cleaned.brand,
           price: parseFloat(product.lowest_recorded_price) || 0,
           image_url: imageUrl,
           description: cleaned.description,
-          category: this.mapCategory(product.category),
+          category: this.determineCategory(cleaned.name) || this.mapCategory(product.category),
+          size: extractedSize || this.generateSize(),
           found: true
         }
       }
@@ -234,42 +246,69 @@ export class ProductFetcher {
     
     const categoryLower = category.toLowerCase()
     
-    // Beauty categories
-    if (categoryLower.includes('beauty') || categoryLower.includes('cosmetics') || 
-        categoryLower.includes('personal care') || categoryLower.includes('skincare')) {
-      return 'Beauty'
-    }
-    
-    if (categoryLower.includes('makeup') || categoryLower.includes('foundation') || 
-        categoryLower.includes('concealer') || categoryLower.includes('blush')) {
-      return 'Makeup'
-    }
-    
+    // Skincare categories
     if (categoryLower.includes('skincare') || categoryLower.includes('moisturizer') || 
-        categoryLower.includes('cleanser') || categoryLower.includes('serum')) {
+        categoryLower.includes('cleanser') || categoryLower.includes('serum') ||
+        categoryLower.includes('toner') || categoryLower.includes('essence') ||
+        categoryLower.includes('eye cream') || categoryLower.includes('facial oil') ||
+        categoryLower.includes('mask') || categoryLower.includes('treatment') ||
+        categoryLower.includes('sunscreen') || categoryLower.includes('spf') ||
+        categoryLower.includes('retinol') || categoryLower.includes('peptide') ||
+        categoryLower.includes('hyaluronic') || categoryLower.includes('vitamin c')) {
       return 'Skincare'
     }
     
+    // Makeup categories
+    if (categoryLower.includes('makeup') || categoryLower.includes('foundation') || 
+        categoryLower.includes('concealer') || categoryLower.includes('blush') ||
+        categoryLower.includes('bronzer') || categoryLower.includes('highlighter') ||
+        categoryLower.includes('eyeshadow') || categoryLower.includes('mascara') ||
+        categoryLower.includes('eyeliner') || categoryLower.includes('lipstick') ||
+        categoryLower.includes('lip gloss') || categoryLower.includes('primer') ||
+        categoryLower.includes('setting spray') || categoryLower.includes('powder') ||
+        categoryLower.includes('brow') || categoryLower.includes('eyebrow') ||
+        categoryLower.includes('contour') || categoryLower.includes('illuminator')) {
+      return 'Makeup'
+    }
+    
+    // Hair care categories
     if (categoryLower.includes('hair') || categoryLower.includes('shampoo') || 
-        categoryLower.includes('conditioner')) {
+        categoryLower.includes('conditioner') || categoryLower.includes('hair mask') ||
+        categoryLower.includes('hair oil') || categoryLower.includes('hair serum') ||
+        categoryLower.includes('hair treatment') || categoryLower.includes('hair spray') ||
+        categoryLower.includes('hair gel') || categoryLower.includes('hair cream') ||
+        categoryLower.includes('hair mousse') || categoryLower.includes('dry shampoo')) {
       return 'Hair Care'
     }
     
-    // Other categories
-    if (categoryLower.includes('food') || categoryLower.includes('snack') || 
-        categoryLower.includes('beverage') || categoryLower.includes('drink') ||
-        categoryLower.includes('noodle') || categoryLower.includes('kitchen')) {
-      return 'Food & Beverage'
+    // Fragrance categories
+    if (categoryLower.includes('fragrance') || categoryLower.includes('perfume') ||
+        categoryLower.includes('cologne') || categoryLower.includes('body mist') ||
+        categoryLower.includes('body spray') || categoryLower.includes('eau de toilette') ||
+        categoryLower.includes('eau de parfum') || categoryLower.includes('parfum')) {
+      return 'Fragrance'
     }
     
-    if (categoryLower.includes('household') || categoryLower.includes('cleaning') ||
-        categoryLower.includes('laundry') || categoryLower.includes('detergent')) {
-      return 'Household'
+    // Body care categories
+    if (categoryLower.includes('body') || categoryLower.includes('body lotion') ||
+        categoryLower.includes('body wash') || categoryLower.includes('body scrub') ||
+        categoryLower.includes('body oil') || categoryLower.includes('hand cream') ||
+        categoryLower.includes('foot cream') || categoryLower.includes('deodorant')) {
+      return 'Body Care'
     }
     
-    if (categoryLower.includes('health') || categoryLower.includes('medicine') ||
-        categoryLower.includes('vitamin') || categoryLower.includes('supplement')) {
-      return 'Health & Wellness'
+    // Tools and accessories
+    if (categoryLower.includes('brush') || categoryLower.includes('sponge') ||
+        categoryLower.includes('beauty blender') || categoryLower.includes('mirror') ||
+        categoryLower.includes('tweezers') || categoryLower.includes('curler') ||
+        categoryLower.includes('lash curler') || categoryLower.includes('applicator')) {
+      return 'Tools & Accessories'
+    }
+    
+    // General beauty
+    if (categoryLower.includes('beauty') || categoryLower.includes('cosmetics') || 
+        categoryLower.includes('personal care')) {
+      return 'Beauty'
     }
     
     return 'Other'
@@ -348,11 +387,14 @@ export class ProductFetcher {
       const aiResult = await generateProductInfo(sku)
       
       if (aiResult?.found && aiResult.name && aiResult.brand) {
+        // Extract size from product name
+        const { size: extractedSize } = extractSizeFromTitle(aiResult.name)
+        
         return {
           ...aiResult,
           description: await this.generateDescription(aiResult.name, aiResult.brand),
           category: this.determineCategory(aiResult.name),
-          size: this.generateSize(),
+          size: extractedSize || this.generateSize(),
           rating: this.generateRating(),
           reviews: this.generateReviewCount(),
           found: true
@@ -401,33 +443,73 @@ export class ProductFetcher {
    */
   private determineCategory(name: string): string {
     const categories = {
-      'Foundation': ['foundation', 'base', 'tint'],
-      'Concealer': ['concealer', 'cover'],
-      'Powder': ['powder', 'setting'],
-      'Blush': ['blush', 'cheek'],
-      'Bronzer': ['bronzer', 'contour'],
-      'Highlighter': ['highlighter', 'glow', 'illuminator'],
-      'Eyeshadow': ['eyeshadow', 'shadow', 'palette'],
-      'Mascara': ['mascara', 'lash'],
-      'Eyeliner': ['eyeliner', 'liner'],
-      'Lipstick': ['lipstick', 'lip'],
-      'Lip Gloss': ['gloss', 'lip gloss'],
-      'Setting Spray': ['spray', 'setting'],
-      'Primer': ['primer'],
-      'Cleanser': ['cleanser', 'wash'],
-      'Moisturizer': ['moisturizer', 'cream', 'lotion'],
-      'Serum': ['serum', 'treatment'],
-      'Mask': ['mask', 'treatment'],
-      'Eye Cream': ['eye cream', 'eye treatment'],
-      'Toner': ['toner', 'essence'],
-      'Oil': ['oil', 'facial oil']
+      // Skincare
+      'Skincare': ['skincare', 'moisturizer', 'cleanser', 'serum', 'toner', 'essence', 'eye cream', 'facial oil', 'mask', 'treatment', 'sunscreen', 'spf', 'retinol', 'peptide', 'hyaluronic', 'vitamin c', 'niacinamide', 'aha', 'bha', 'exfoliant', 'face wash', 'facial cleanser', 'night cream', 'day cream', 'spot treatment', 'acne treatment', 'lotion'],
+      
+      // Makeup - Face
+      'Foundation': ['foundation', 'base', 'tint', 'bb cream', 'cc cream', 'tinted moisturizer'],
+      'Concealer': ['concealer', 'cover', 'color corrector'],
+      'Powder': ['powder', 'setting powder', 'loose powder', 'pressed powder', 'translucent powder'],
+      'Blush': ['blush', 'cheek', 'rouge'],
+      'Bronzer': ['bronzer', 'contour', 'sculpting'],
+      'Highlighter': ['highlighter', 'glow', 'illuminator', 'luminizer'],
+      'Primer': ['primer', 'base primer', 'face primer'],
+      'Setting Spray': ['setting spray', 'finishing spray', 'makeup setting'],
+      
+      // Makeup - Eyes
+      'Eyeshadow': ['eyeshadow', 'shadow', 'palette', 'eye palette', 'eye shadow'],
+      'Mascara': ['mascara', 'lash', 'lash mascara'],
+      'Eyeliner': ['eyeliner', 'liner', 'eye liner', 'kohl', 'pencil'],
+      'Brow': ['brow', 'eyebrow', 'brow pencil', 'brow gel', 'brow powder', 'brow pomade'],
+      'Eye Primer': ['eye primer', 'eyeshadow primer', 'eye base'],
+      
+      // Makeup - Lips
+      'Lipstick': ['lipstick', 'lip stick', 'lip color', 'lip product'],
+      'Lip Gloss': ['lip gloss', 'gloss', 'lip shine'],
+      'Lip Liner': ['lip liner', 'lip pencil', 'lip outline'],
+      'Lip Balm': ['lip balm', 'chapstick', 'lip treatment'],
+      
+      // Hair Care
+      'Hair Care': ['shampoo', 'conditioner', 'hair mask', 'hair oil', 'hair serum', 'hair treatment', 'hair spray', 'hair gel', 'hair cream', 'hair mousse', 'dry shampoo', 'hair conditioner', 'hair shampoo', 'hair product', 'hair styling', 'hair care'],
+      
+      // Fragrance
+      'Fragrance': ['perfume', 'cologne', 'fragrance', 'body mist', 'body spray', 'eau de toilette', 'eau de parfum', 'parfum', 'scent'],
+      
+      // Body Care
+      'Body Care': ['body lotion', 'body wash', 'body scrub', 'body oil', 'hand cream', 'foot cream', 'deodorant', 'body cream', 'body moisturizer', 'lotion'],
+      
+      // Tools & Accessories
+      'Tools & Accessories': ['brush', 'sponge', 'beauty blender', 'mirror', 'tweezers', 'curler', 'lash curler', 'applicator', 'makeup brush', 'beauty tool', 'makeup tool']
     }
 
     const lowerName = name.toLowerCase()
+    
+    // Check for specific categories first (more specific matches)
     for (const [category, keywords] of Object.entries(categories)) {
       if (keywords.some(keyword => lowerName.includes(keyword))) {
         return category
       }
+    }
+
+    // If no specific category found, try to determine general beauty category
+    if (lowerName.includes('makeup') || lowerName.includes('cosmetic')) {
+      return 'Makeup'
+    }
+    
+    if (lowerName.includes('skin') || lowerName.includes('face')) {
+      return 'Skincare'
+    }
+    
+    if (lowerName.includes('hair')) {
+      return 'Hair Care'
+    }
+    
+    if (lowerName.includes('perfume') || lowerName.includes('fragrance')) {
+      return 'Fragrance'
+    }
+    
+    if (lowerName.includes('body')) {
+      return 'Body Care'
     }
 
     return 'Beauty'

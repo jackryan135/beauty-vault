@@ -31,30 +31,86 @@ echo "📦 Creating database: $DB_NAME"
 # Create database if it doesn't exist
 psql -U $DB_USER -h localhost -c "CREATE DATABASE $DB_NAME;" 2>/dev/null || echo "Database already exists"
 
-# Create products table
+# Create products table with status column
 echo "🗂️  Creating products table..."
 psql -U $DB_USER -h localhost -d $DB_NAME -c "
 CREATE TABLE IF NOT EXISTS products (
-    id SERIAL PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     sku VARCHAR(255) UNIQUE NOT NULL,
-    name VARCHAR(255) NOT NULL,
+    name VARCHAR(500) NOT NULL,
     brand VARCHAR(255) NOT NULL,
-    price DECIMAL(10,2) NOT NULL,
+    price DECIMAL(10,2) NOT NULL DEFAULT 0,
     image_url TEXT,
-    quantity INTEGER DEFAULT 0,
-    is_active BOOLEAN DEFAULT true,
-    metadata JSONB DEFAULT '{}',
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    quantity INTEGER NOT NULL DEFAULT 1,
+    is_active BOOLEAN NOT NULL DEFAULT true,
+    status VARCHAR(20) NOT NULL DEFAULT 'in_vault' CHECK (status IN ('in_vault', 'on_shelf', 'used_up')),
+    metadata JSONB NOT NULL DEFAULT '{}',
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
+"
+
+# Add status column to existing table if it doesn't exist
+echo "🔄 Checking for status column migration..."
+psql -U $DB_USER -h localhost -d $DB_NAME -c "
+DO \$\$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                   WHERE table_name = 'products' AND column_name = 'status') THEN
+        ALTER TABLE products ADD COLUMN status VARCHAR(20) NOT NULL DEFAULT 'in_vault';
+    END IF;
+END \$\$;
+"
+
+# Add check constraint if it doesn't exist
+psql -U $DB_USER -h localhost -d $DB_NAME -c "
+DO \$\$ 
+BEGIN
+    IF NOT EXISTS (SELECT 1 FROM information_schema.check_constraints 
+                   WHERE constraint_name = 'products_status_check') THEN
+        ALTER TABLE products ADD CONSTRAINT products_status_check 
+        CHECK (status IN ('in_vault', 'on_shelf', 'used_up'));
+    END IF;
+END \$\$;
 "
 
 # Create indexes
 echo "📊 Creating indexes..."
 psql -U $DB_USER -h localhost -d $DB_NAME -c "
 CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
+CREATE INDEX IF NOT EXISTS idx_products_brand ON products(brand);
 CREATE INDEX IF NOT EXISTS idx_products_is_active ON products(is_active);
-CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at);
+CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
+CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at DESC);
+"
+
+# Create trigger function and trigger
+echo "🔧 Creating trigger function and trigger..."
+psql -U $DB_USER -h localhost -d $DB_NAME -c "
+-- Create a function to update the updated_at timestamp
+CREATE OR REPLACE FUNCTION update_updated_at_column()
+RETURNS TRIGGER AS \$\$
+BEGIN
+    NEW.updated_at = NOW();
+    RETURN NEW;
+END;
+\$\$ language 'plpgsql';
+
+-- Create trigger to automatically update updated_at
+CREATE TRIGGER update_products_updated_at 
+    BEFORE UPDATE ON products 
+    FOR EACH ROW 
+    EXECUTE FUNCTION update_updated_at_column();
+"
+
+# Update existing products to have proper status
+echo "🔄 Updating existing products with proper status..."
+psql -U $DB_USER -h localhost -d $DB_NAME -c "
+-- Set used_up for inactive products
+UPDATE products SET status = 'used_up' WHERE is_active = false AND status = 'in_vault';
+
+-- Ensure all active products have either in_vault or on_shelf status
+UPDATE products SET status = 'in_vault' WHERE is_active = true AND status IS NULL;
 "
 
 echo "✅ Database setup complete!"

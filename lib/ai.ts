@@ -1,5 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import { getBestImageUrl } from './image-sources'
+import { extractSizeFromTitle } from './text-cleaner'
 
 interface AIProductInfo {
   name: string
@@ -7,6 +8,8 @@ interface AIProductInfo {
   price: number
   image_url: string
   found?: boolean
+  size?: string
+  category?: string
 }
 
 /**
@@ -135,7 +138,22 @@ async function searchForBasicProduct(sku: string): Promise<AIProductInfo> {
     'TARTE': 'Tarte',
     'BARE MINERALS': 'BareMinerals',
     'BENEFIT': 'Benefit',
-    'MILK': 'Milk Makeup'
+    'MILK': 'Milk Makeup',
+    'CLINIQUE': 'Clinique',
+    'ESTEE': 'Estee Lauder',
+    'LANCOME': 'Lancome',
+    'DIOR': 'Dior',
+    'CHANEL': 'Chanel',
+    'YSL': 'YSL',
+    'GUERLAIN': 'Guerlain',
+    'SHISEIDO': 'Shiseido',
+    'SKII': 'SK-II',
+    'DRUNK': 'Drunk Elephant',
+    'ORDINARY': 'The Ordinary',
+    'PAULA': 'Paula\'s Choice',
+    'CERAVE': 'CeraVe',
+    'NEUTROGENA': 'Neutrogena',
+    'OLAY': 'Olay'
   }
   
   let foundBrand = 'Unknown Brand'
@@ -146,33 +164,92 @@ async function searchForBasicProduct(sku: string): Promise<AIProductInfo> {
     }
   }
   
-  // Product type pattern matching
+  // Product type pattern matching with improved categories
   const productPatterns = {
+    // Skincare
+    'SKINCARE': 'Skincare',
+    'MOISTURIZER': 'Skincare',
+    'CLEANSER': 'Skincare',
+    'SERUM': 'Skincare',
+    'TONER': 'Skincare',
+    'ESSENCE': 'Skincare',
+    'EYE CREAM': 'Skincare',
+    'FACIAL OIL': 'Skincare',
+    'MASK': 'Skincare',
+    'TREATMENT': 'Skincare',
+    'SUNSCREEN': 'Skincare',
+    'SPF': 'Skincare',
+    'RETINOL': 'Skincare',
+    'PEPTIDE': 'Skincare',
+    'HYALURONIC': 'Skincare',
+    'VITAMIN C': 'Skincare',
+    'NIACINAMIDE': 'Skincare',
+    'AHA': 'Skincare',
+    'BHA': 'Skincare',
+    'EXFOLIANT': 'Skincare',
+    
+    // Makeup - Face
     'FOUNDATION': 'Foundation',
     'CONCEALER': 'Concealer',
     'POWDER': 'Powder',
     'BLUSH': 'Blush',
     'BRONZER': 'Bronzer',
     'HIGHLIGHT': 'Highlighter',
+    'ILLUMINATOR': 'Highlighter',
+    'PRIMER': 'Primer',
+    'SETTING SPRAY': 'Setting Spray',
+    
+    // Makeup - Eyes
     'EYESHADOW': 'Eyeshadow',
     'MASCARA': 'Mascara',
     'EYELINER': 'Eyeliner',
+    'BROW': 'Brow',
+    'EYEBROW': 'Brow',
+    'EYE PRIMER': 'Eye Primer',
+    
+    // Makeup - Lips
     'LIPSTICK': 'Lipstick',
     'LIP GLOSS': 'Lip Gloss',
-    'PRIMER': 'Primer',
-    'CLEANSER': 'Cleanser',
-    'MOISTURIZER': 'Moisturizer',
-    'SERUM': 'Serum',
-    'MASK': 'Face Mask',
-    'EYE CREAM': 'Eye Cream',
-    'TONER': 'Toner',
-    'OIL': 'Facial Oil'
+    'LIP LINER': 'Lip Liner',
+    'LIP BALM': 'Lip Balm',
+    
+    // Hair Care
+    'SHAMPOO': 'Hair Care',
+    'CONDITIONER': 'Hair Care',
+    'HAIR MASK': 'Hair Care',
+    'HAIR OIL': 'Hair Care',
+    'HAIR SERUM': 'Hair Care',
+    'HAIR TREATMENT': 'Hair Care',
+    'HAIR SPRAY': 'Hair Care',
+    'HAIR GEL': 'Hair Care',
+    'HAIR CREAM': 'Hair Care',
+    'HAIR MOUSSE': 'Hair Care',
+    'DRY SHAMPOO': 'Hair Care',
+    
+    // Fragrance
+    'PERFUME': 'Fragrance',
+    'COLOGNE': 'Fragrance',
+    'FRAGRANCE': 'Fragrance',
+    'BODY MIST': 'Fragrance',
+    'BODY SPRAY': 'Fragrance',
+    
+    // Body Care
+    'BODY LOTION': 'Body Care',
+    'BODY WASH': 'Body Care',
+    'BODY SCRUB': 'Body Care',
+    'BODY OIL': 'Body Care',
+    'HAND CREAM': 'Body Care',
+    'FOOT CREAM': 'Body Care',
+    'DEODORANT': 'Body Care'
   }
   
   let foundProduct = 'Beauty Product'
+  let foundCategory = 'Beauty'
+  
   for (const [pattern, product] of Object.entries(productPatterns)) {
     if (skuUpper.includes(pattern)) {
       foundProduct = product
+      foundCategory = product
       break
     }
   }
@@ -183,11 +260,16 @@ async function searchForBasicProduct(sku: string): Promise<AIProductInfo> {
   const productName = `${foundBrand} ${foundProduct}`
   const imageUrl = await getBestImageUrl(productName, foundBrand)
   
+  // Extract size from product name
+  const { size: extractedSize } = extractSizeFromTitle(productName)
+  
   return {
     name: productName,
     brand: foundBrand,
     price: 0,
     image_url: imageUrl,
+    size: extractedSize,
+    category: foundCategory,
     found: hasBrandPattern || hasProductPattern
   }
 }

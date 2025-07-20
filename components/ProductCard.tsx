@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Heart, Palette, Star, Users, Package, AlertCircle, Settings } from 'lucide-react'
+import { Heart, Palette, Star, Users, Package, AlertCircle, Settings, Lock, Share2 } from 'lucide-react'
 import { Product } from '../types/product'
 import { getFallbackImage, getDisplayImageUrl } from '../lib/image-fallback'
 
@@ -10,12 +10,21 @@ interface ProductCardProps {
   product: Product
   onUseProduct: (id: string) => void
   onViewDetails?: (product: Product) => void
+  onStatusChange?: (id: string, status: 'in_vault' | 'on_shelf') => void
   editedImageUrl?: string | null
 }
 
-const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onViewDetails, editedImageUrl }) => {
+const ProductCard: React.FC<ProductCardProps> = ({ 
+  product, 
+  onUseProduct, 
+  onViewDetails, 
+  onStatusChange,
+  editedImageUrl 
+}) => {
   const [imageLoaded, setImageLoaded] = useState(false)
   const [imageError, setImageError] = useState(false)
+  const [isStatusChanging, setIsStatusChanging] = useState(false)
+  
   const isActive = product.is_active
   const metadata = product.metadata || {}
   const isFound = metadata.source === 'real_data' || metadata.found === true
@@ -26,9 +35,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onView
       name: product.name,
       originalImageUrl: product.image_url,
       isFound,
-      source: metadata.source
+      source: metadata.source,
+      status: product.status
     })
-  }, [product.name, product.image_url, isFound, metadata.source])
+  }, [product.name, product.image_url, isFound, metadata.source, product.status])
   
   console.log('ProductCard render:', {
     name: product.name,
@@ -36,8 +46,86 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onView
     isFound,
     source: metadata.source,
     imageLoaded,
-    imageError
+    imageError,
+    status: product.status
   })
+
+  const handleStatusChange = async (newStatus: 'in_vault' | 'on_shelf') => {
+    if (!onStatusChange || isStatusChanging) return
+    
+    setIsStatusChanging(true)
+    try {
+      await onStatusChange(product.id, newStatus)
+    } catch (error) {
+      console.error('Error changing status:', error)
+    } finally {
+      setIsStatusChanging(false)
+    }
+  }
+
+  const getStatusBadge = () => {
+    switch (product.status) {
+      case 'in_vault':
+        return (
+          <div className="bg-pink-100 text-pink-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <Lock className="w-3 h-3" />
+            In Vault
+          </div>
+        )
+      case 'on_shelf':
+        return (
+          <div className="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium flex items-center gap-1">
+            <Share2 className="w-3 h-3" />
+            On Shelf
+          </div>
+        )
+      case 'used_up':
+        return (
+          <div className="bg-gray-100 text-gray-700 px-2 py-1 rounded-full text-xs font-medium">
+            Used Up
+          </div>
+        )
+      default:
+        return null
+    }
+  }
+
+  const getStatusButton = () => {
+    if (!isActive || product.quantity <= 0) return null
+
+    if (product.status === 'in_vault') {
+      return (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => handleStatusChange('on_shelf')}
+          disabled={isStatusChanging}
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-600 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <div className="flex items-center justify-center gap-2">
+            <Share2 className="w-4 h-4" />
+            {isStatusChanging ? 'Moving...' : 'Add to Shelf'}
+          </div>
+        </motion.button>
+      )
+    } else if (product.status === 'on_shelf') {
+      return (
+        <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={() => handleStatusChange('in_vault')}
+          disabled={isStatusChanging}
+          className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 px-4 rounded-xl font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          <div className="flex items-center justify-center gap-2">
+            <Lock className="w-4 h-4" />
+            {isStatusChanging ? 'Moving...' : 'Add to Vault'}
+          </div>
+        </motion.button>
+      )
+    }
+    return null
+  }
   
   return (
     <motion.div
@@ -97,12 +185,8 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onView
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-0" />
         
         {/* Status Badge */}
-        <div className={`absolute top-3 right-3 px-2 py-1 rounded-full text-xs font-medium z-20 ${
-          isActive 
-            ? 'bg-pink-500 text-white' 
-            : 'bg-gray-500 text-white'
-        }`}>
-          {isActive ? 'In Your Vault' : 'Used Up'}
+        <div className="absolute top-3 right-3 z-20">
+          {getStatusBadge()}
         </div>
 
         {/* Source Badge */}
@@ -176,13 +260,13 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onView
         </div>
 
         {/* Rating and Reviews */}
-        {metadata.rating && (
+        {metadata.rating && metadata.rating > 0 && (
           <div className="flex items-center gap-2 mb-3">
             <div className="flex items-center gap-1">
               <Star className="w-4 h-4 text-yellow-400 fill-current" />
               <span className="text-sm font-medium text-gray-700">{metadata.rating}</span>
             </div>
-            {metadata.reviews && (
+            {metadata.reviews && metadata.reviews > 0 && (
               <div className="flex items-center gap-1 text-sm text-gray-500">
                 <Users className="w-3 h-3" />
                 <span>({metadata.reviews.toLocaleString()} reviews)</span>
@@ -213,19 +297,25 @@ const ProductCard: React.FC<ProductCardProps> = ({ product, onUseProduct, onView
           )}
         </div>
 
-        {/* Use Product Button */}
+        {/* Action Buttons */}
         {isActive && product.quantity > 0 && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onUseProduct(product.id)}
-            className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 px-4 rounded-xl font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-md hover:shadow-lg"
-          >
-            <div className="flex items-center justify-center gap-2">
-              <Heart className="w-4 h-4" />
-              Use Product
-            </div>
-          </motion.button>
+          <div className="space-y-3">
+            {/* Check out Button */}
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => onUseProduct(product.id)}
+              className="w-full bg-gradient-to-r from-pink-500 to-rose-500 text-white py-3 px-4 rounded-xl font-medium hover:from-pink-600 hover:to-rose-600 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Heart className="w-4 h-4" />
+                Check out
+              </div>
+            </motion.button>
+
+            {/* Status Change Button */}
+            {getStatusButton()}
+          </div>
         )}
 
         {/* Used Up Message */}
