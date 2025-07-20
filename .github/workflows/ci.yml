@@ -24,8 +24,11 @@ jobs:
         cache: 'npm'
 
     - name: Install dependencies
-      run: npm ci
+      run: npm ci --include=dev
 
+    - name: Verify TypeScript installation
+      run: npx tsc --version
+      
     - name: Check TypeScript
       run: npm run type-check
 

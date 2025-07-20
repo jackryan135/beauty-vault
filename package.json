@@ -8,7 +8,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "type-check": "node node_modules/typescript/bin/tsc --noEmit",
+    "type-check": "npx tsc --noEmit",
     "build:production": "NODE_ENV=production next build",
     "analyze": "ANALYZE=true npm run build",
     "postbuild": "echo 'Build completed successfully!'"
