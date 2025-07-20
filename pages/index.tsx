@@ -876,7 +876,7 @@ export default function Home() {
                         onUseProduct={handleScanOut}
                         onViewDetails={handleViewDetails}
                         onStatusChange={handleStatusChange}
-                        editedImageUrl={editingData[product.id]?.image_url}
+                        editedImageUrl={getEditedImageUrl(product.id)}
                       />
                     ))}
                   </div>
@@ -905,7 +905,7 @@ export default function Home() {
                         onUseProduct={handleScanOut}
                         onViewDetails={handleViewDetails}
                         onStatusChange={handleStatusChange}
-                        editedImageUrl={editingData[product.id]?.image_url}
+                        editedImageUrl={getEditedImageUrl(product.id)}
                       />
                     ))}
                   </div>
@@ -933,7 +933,7 @@ export default function Home() {
                         onUseProduct={handleScanOut}
                         onViewDetails={handleViewDetails}
                         onStatusChange={handleStatusChange}
-                        editedImageUrl={editingData[product.id]?.image_url}
+                        editedImageUrl={getEditedImageUrl(product.id)}
                       />
                     ))}
                   </div>
