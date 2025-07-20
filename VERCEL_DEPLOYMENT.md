@@ -2,7 +2,7 @@
 
 This guide will help you deploy the Olivia's Beauty Vault application to Vercel with proper security and configuration.
 
-## Prerequisites
+## Prerequisites 
 
 1. A Vercel account
 2. A PostgreSQL database (recommended: Supabase, Neon, or Railway)
