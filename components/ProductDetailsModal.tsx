@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Edit3, Image as ImageIcon } from 'lucide-react'
+import { X, Save, Edit3 } from 'lucide-react'
 import { Product } from '../types/product'
 import { getFallbackImage, getDisplayImageUrl } from '../lib/image-fallback'
 

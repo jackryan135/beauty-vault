@@ -105,10 +105,45 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: { id: st
   if (req.method === 'DELETE') {
     // Remove item from list
     try {
+      // Get the shopping list ID before deleting the item
+      const listIdResult = await authQuery(
+        'SELECT shopping_list_id FROM shopping_list_items WHERE id = $1',
+        [id]
+      )
+
+      if (listIdResult.rows.length === 0) {
+        return res.status(404).json({ success: false, message: 'Item not found' })
+      }
+
+      const shoppingListId = listIdResult.rows[0].shopping_list_id
+
+      // Delete the item
       await authQuery(
         'DELETE FROM shopping_list_items WHERE id = $1',
         [id]
       )
+
+      // Check if this was the last item in the shopping list
+      const remainingItemsResult = await authQuery(
+        'SELECT COUNT(*) as remaining_items FROM shopping_list_items WHERE shopping_list_id = $1',
+        [shoppingListId]
+      )
+
+      const remainingItems = parseInt(remainingItemsResult.rows[0].remaining_items)
+
+      // If no items remain, delete the shopping list
+      if (remainingItems === 0) {
+        await authQuery(
+          'UPDATE shopping_lists SET is_active = false WHERE id = $1',
+          [shoppingListId]
+        )
+
+        return res.status(200).json({
+          success: true,
+          message: 'Item removed and shopping list deleted',
+          list_deleted: true
+        })
+      }
 
       return res.status(200).json({
         success: true,

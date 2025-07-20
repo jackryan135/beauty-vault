@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ShoppingBag, X, Trash2, Check, Users, Package } from 'lucide-react'
-import { ShoppingList, ShoppingListItem } from '../types/product'
+import { ShoppingBag, X, Trash2, Check, Users, Package, ChevronDown, ChevronUp } from 'lucide-react'
+import { ShoppingList } from '../types/product'
 
 interface AdminShoppingListsModalProps {
   isOpen: boolean
@@ -182,15 +182,14 @@ export default function AdminShoppingListsModal({
                             <div className="flex items-center space-x-2">
                               <button
                                 onClick={() => toggleListExpansion(list.id)}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="p-2 hover:bg-sephora-50 rounded-lg transition-colors border border-gray-200 hover:border-sephora-200"
                                 title={isExpanded ? 'Collapse' : 'Expand'}
                               >
-                                <motion.div
-                                  animate={{ rotate: isExpanded ? 180 : 0 }}
-                                  transition={{ duration: 0.2 }}
-                                >
-                                  <X className="h-4 w-4" />
-                                </motion.div>
+                                {isExpanded ? (
+                                  <ChevronUp className="h-5 w-5 text-sephora-600" />
+                                ) : (
+                                  <ChevronDown className="h-5 w-5 text-sephora-600" />
+                                )}
                               </button>
                               <button
                                 onClick={() => handleCheckoutAll(list.id)}
