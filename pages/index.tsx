@@ -27,10 +27,15 @@ export default function Home() {
   const fetchProducts = async () => {
     try {
       const response = await fetch('/api/products')
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`)
+      }
       const data = await response.json()
       setProducts(data)
     } catch (error) {
+      console.error('Error fetching products:', error)
       toast.error('Failed to fetch products')
+      setProducts([]) // Set empty array on error to prevent infinite loading
     } finally {
       setLoading(false)
     }
@@ -152,12 +157,18 @@ export default function Home() {
       })
 
       if (response.ok) {
+        const result = await response.json()
+        console.log('Clear database result:', result)
         toast.success('Database cleared successfully!')
-        fetchProducts()
+        setProducts([]) // Immediately clear the products array
+        await fetchProducts() // Then refetch to ensure sync
       } else {
-        toast.error('Failed to clear database')
+        const errorData = await response.json().catch(() => ({}))
+        console.error('Clear database error:', errorData)
+        toast.error(`Failed to clear database: ${errorData.error || 'Unknown error'}`)
       }
     } catch (error) {
+      console.error('Clear database error:', error)
       toast.error('Failed to clear database')
     } finally {
       setIsClearing(false)

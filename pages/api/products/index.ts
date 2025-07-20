@@ -1,29 +1,52 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { db, initializeDatabase } from '../../../lib/db'
+import { db, initializeDatabase, testDatabaseConnection } from '../../../lib/db'
 import { ProductFetcher } from '../../../lib/product-fetcher'
 
 // Initialize database on first API call
 let dbInitialized = false
+let dbInitPromise: Promise<void> | null = null
 
 async function ensureDatabaseInitialized() {
-  if (!dbInitialized) {
+  if (dbInitialized) return
+  
+  if (dbInitPromise) {
+    // Wait for existing initialization to complete
+    await dbInitPromise
+    return
+  }
+  
+  dbInitPromise = (async () => {
     try {
+      console.log('Initializing database...')
       await initializeDatabase()
       dbInitialized = true
+      console.log('Database initialized successfully')
     } catch (error) {
       console.error('Database initialization failed:', error)
       // Continue with mock database if initialization fails
+      dbInitialized = true // Mark as initialized to prevent retries
     }
-  }
+  })()
+  
+  await dbInitPromise
 }
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   // Ensure database is initialized before any operations
   await ensureDatabaseInitialized()
 
+  // Test database connection first
+  // const isConnected = await testDatabaseConnection()
+  // if (!isConnected) {
+  //   console.error('Database connection failed')
+  //   return res.status(500).json({ error: 'Database connection failed' })
+  // }
+
   if (req.method === 'GET') {
     try {
+      console.log('Fetching products from database...')
       const { rows } = await db.query('SELECT * FROM products ORDER BY created_at DESC')
+      console.log(`Found ${rows.length} products`)
       res.status(200).json(rows)
     } catch (error) {
       console.error('Error fetching products:', error)

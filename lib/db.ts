@@ -32,12 +32,27 @@ function initializeDB() {
   if (isDevelopment && useLocalDB) {
     pool = new Pool({
       host: process.env.LOCAL_DB_HOST || 'localhost',
-      port: parseInt(process.env.LOCAL_DB_PORT || '5432'),
+      port: parseInt(process.env.LOCAL_DB_PORT || '5433'),
       database: process.env.LOCAL_DB_NAME || 'olivias_beauty_vault',
       user: process.env.LOCAL_DB_USER || 'postgres',
       password: process.env.LOCAL_DB_PASSWORD || 'password',
       ssl: false,
+      // Basic connection configuration
+      max: 1,
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
     })
+    
+    // Add event handlers for debugging
+    pool.on('connect', (client) => {
+      console.log('New client connected to database')
+    })
+    
+    pool.on('error', (err, client) => {
+      console.error('Unexpected error on idle client', err)
+    })
+    
+    console.log('Initialized local database connection pool')
   } else if (process.env.POSTGRES_URL) {
     // Production database configuration
     const config: any = {
@@ -86,18 +101,28 @@ export const db = {
       return mockQuery(sql, params)
     }
 
-    try {
-      const client = await pool.connect()
+    let retries = 3
+    while (retries > 0) {
       try {
-        const result = await client.query(sql, params)
-        return { rows: result.rows }
-      } finally {
-        client.release()
+        const client = await pool.connect()
+        try {
+          const result = await client.query(sql, params)
+          return { rows: result.rows }
+        } finally {
+          client.release()
+        }
+      } catch (error) {
+        retries--
+        console.error(`Database query error (${3 - retries}/3):`, error)
+        if (retries === 0) {
+          throw error
+        }
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, 1000))
       }
-    } catch (error) {
-      console.error('Database query error:', error)
-      throw error
     }
+    
+    throw new Error('Database query failed after all retries')
   },
 
   async transaction<T>(callback: (client: PoolClient) => Promise<T>): Promise<T> {
@@ -192,6 +217,30 @@ function mockQuery(sql: string, params: any[] = []): { rows: Product[] } {
 }
 
 /**
+ * Test database connection
+ */
+export async function testDatabaseConnection() {
+  const pool = initializeDB()
+  if (!pool) {
+    console.log('Using mock database')
+    return true
+  }
+
+  try {
+    const client = await pool.connect()
+    try {
+      await client.query('SELECT 1 as test')
+      return true
+    } finally {
+      client.release()
+    }
+  } catch (error) {
+    console.error('Database connection test failed:', error)
+    return false
+  }
+}
+
+/**
  * Initializes database schema and indexes
  */
 export async function initializeDatabase() {
@@ -206,24 +255,45 @@ export async function initializeDatabase() {
     try {
       await client.query(`
         CREATE TABLE IF NOT EXISTS products (
-          id SERIAL PRIMARY KEY,
+          id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
           sku VARCHAR(255) UNIQUE NOT NULL,
-          name VARCHAR(255) NOT NULL,
+          name VARCHAR(500) NOT NULL,
           brand VARCHAR(255) NOT NULL,
-          price DECIMAL(10,2) NOT NULL,
+          price DECIMAL(10,2) NOT NULL DEFAULT 0,
           image_url TEXT,
-          quantity INTEGER DEFAULT 0,
-          is_active BOOLEAN DEFAULT true,
-          metadata JSONB DEFAULT '{}',
-          created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-          updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+          quantity INTEGER NOT NULL DEFAULT 1,
+          is_active BOOLEAN NOT NULL DEFAULT true,
+          metadata JSONB NOT NULL DEFAULT '{}',
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+          updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
         );
       `)
       
       await client.query(`
         CREATE INDEX IF NOT EXISTS idx_products_sku ON products(sku);
+        CREATE INDEX IF NOT EXISTS idx_products_brand ON products(brand);
         CREATE INDEX IF NOT EXISTS idx_products_is_active ON products(is_active);
-        CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at);
+        CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at DESC);
+      `)
+      
+      // Create trigger function for updating updated_at timestamp
+      await client.query(`
+        CREATE OR REPLACE FUNCTION update_updated_at_column()
+        RETURNS TRIGGER AS $$
+        BEGIN
+            NEW.updated_at = NOW();
+            RETURN NEW;
+        END;
+        $$ language 'plpgsql';
+      `)
+      
+      // Create trigger to automatically update updated_at
+      await client.query(`
+        DROP TRIGGER IF EXISTS update_products_updated_at ON products;
+        CREATE TRIGGER update_products_updated_at 
+            BEFORE UPDATE ON products 
+            FOR EACH ROW 
+            EXECUTE FUNCTION update_updated_at_column();
       `)
       
       console.log('Database initialized successfully')
