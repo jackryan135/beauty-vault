@@ -160,14 +160,14 @@ function mockQuery<T = any>(sql: string, params: any[] = []): { rows: T[] } {
     if (sql.includes('WHERE sku =')) {
       const sku = params[0];
       const product = mockProducts.find(p => p.sku === sku);
-      return { rows: product ? [product] : [] };
+      return { rows: (product ? [product] : []) as T[] };
     }
     if (sql.includes('WHERE id =')) {
       const id = params[0];
       const product = mockProducts.find(p => p.id === id);
-      return { rows: product ? [product] : [] };
+      return { rows: (product ? [product] : []) as T[] };
     }
-    return { rows: [...mockProducts] };
+    return { rows: [...mockProducts] as T[] };
   }
   
   if (sql.includes('INSERT')) {
@@ -185,7 +185,7 @@ function mockQuery<T = any>(sql: string, params: any[] = []): { rows: T[] } {
       updated_at: new Date().toISOString(),
     };
     mockProducts.unshift(newProduct);
-    return { rows: [newProduct] };
+    return { rows: [newProduct] as T[] };
   }
   
   if (sql.includes('UPDATE')) {
@@ -200,7 +200,7 @@ function mockQuery<T = any>(sql: string, params: any[] = []): { rows: T[] } {
           metadata: params[2],
           updated_at: new Date().toISOString(),
         };
-        return { rows: [mockProducts[productIndex]] };
+        return { rows: [mockProducts[productIndex]] as T[] };
       }
     } else if (sql.includes('WHERE id =')) {
       const id = params[3];
@@ -213,12 +213,12 @@ function mockQuery<T = any>(sql: string, params: any[] = []): { rows: T[] } {
           metadata: params[2],
           updated_at: new Date().toISOString(),
         };
-        return { rows: [mockProducts[productIndex]] };
+        return { rows: [mockProducts[productIndex]] as T[] };
       }
     }
   }
   
-  return { rows: [] };
+  return { rows: [] as T[] };
 }
 
 /**
