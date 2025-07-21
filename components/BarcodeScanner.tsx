@@ -39,6 +39,7 @@ export default function BarcodeScanner({ onDetected, onClose }: BarcodeScannerPr
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const lastDetectedCodeRef = useRef<string | null>(null);
   const lastDetectionTimeRef = useRef<number>(0);
+  const isMountedRef = useRef(true);
 
   const stopScanner = () => {
     try {
@@ -85,7 +86,7 @@ export default function BarcodeScanner({ onDetected, onClose }: BarcodeScannerPr
           undefined, // Use default camera
           videoRef.current,
           (result: Result | null, error: Error | null) => {
-            if (result) {
+            if (result && isMountedRef.current) {
               const code = result.getText();
               const confidence = result.getResultMetadata()?.get(2) as number || 0;
               const currentTime = Date.now();
@@ -101,7 +102,7 @@ export default function BarcodeScanner({ onDetected, onClose }: BarcodeScannerPr
                 lastDetectedCodeRef.current = code;
                 lastDetectionTimeRef.current = currentTime;
                 
-                if (scanning) {
+                if (scanning && isMountedRef.current) {
                   setScanning(false);
                   onDetected(code);
                   stopScanner();
@@ -116,11 +117,15 @@ export default function BarcodeScanner({ onDetected, onClose }: BarcodeScannerPr
           }
         );
         
-        setIsInitialized(true);
+        if (isMountedRef.current) {
+          setIsInitialized(true);
+        }
         
       } catch (e) {
         console.error('Failed to initialize barcode scanner:', e);
-        setError('Camera access denied or not supported');
+        if (isMountedRef.current) {
+          setError('Camera access denied or not supported');
+        }
       }
     };
 
@@ -128,9 +133,10 @@ export default function BarcodeScanner({ onDetected, onClose }: BarcodeScannerPr
 
     // Cleanup on unmount
     return () => {
+      isMountedRef.current = false;
       stopScanner();
     };
-  }, [onDetected, scanning]); // Include dependencies
+  }, []); // Remove dependencies to prevent refresh loops
 
   const handleClose = () => {
     stopScanner();
