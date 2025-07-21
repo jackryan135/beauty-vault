@@ -668,17 +668,19 @@ export default function Home() {
                       <Crown className="h-5 w-5" />
                       <span>All Lists</span>
                     </motion.button>
-                    
-                    <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      onClick={handleClearDatabase}
-                      disabled={isClearing}
-                      className="btn-danger flex items-center space-x-2"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                      <span>{isClearing ? 'Clearing...' : 'Clear DB'}</span>
-                    </motion.button>
+                    {/* Only show Clear DB button if not in production */}
+                    {process.env.NODE_ENV !== 'production' && (
+                      <motion.button
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                        onClick={handleClearDatabase}
+                        disabled={isClearing}
+                        className="btn-danger flex items-center space-x-2"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                        <span>{isClearing ? 'Clearing...' : 'Clear DB'}</span>
+                      </motion.button>
+                    )}
                     
                     <motion.button
                       whileHover={{ scale: 1.05 }}

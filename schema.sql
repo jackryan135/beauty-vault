@@ -26,6 +26,9 @@ CREATE TABLE IF NOT EXISTS users (
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
+-- Add unique constraint to prevent duplicate admin users
+ALTER TABLE users ADD CONSTRAINT unique_user_name_role UNIQUE (name, role);
+
 -- Create shopping lists table
 CREATE TABLE IF NOT EXISTS shopping_lists (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
