@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Hash, Loader, Gem, Sparkles } from 'lucide-react'
 import BarcodeScanner from './BarcodeScanner';
@@ -35,6 +35,13 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
     setShowScanner(false)
   }
 
+  // Cleanup scanner when modal closes
+  useEffect(() => {
+    if (!isOpen && showScanner) {
+      setShowScanner(false)
+    }
+  }, [isOpen, showScanner])
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -56,7 +63,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="modal-content w-full max-w-sm sm:max-w-md p-2 sm:p-8"
+            className="modal-content w-full max-w-sm sm:max-w-md p-2 sm:p-8 overflow-hidden"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
@@ -100,7 +107,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
                   <button
                     type="button"
                     className="ml-2 md:hidden btn-primary px-4 py-2 flex items-center gap-2"
-                    onClick={() => { setScannerKey(prev => prev + 1); setShowScanner(false); setTimeout(() => setShowScanner(true), 50); }}
+                    onClick={() => { setScannerKey(prev => prev + 1); setShowScanner(true); }}
                   >
                     <span role="img" aria-label="Scan">📷</span>
                     Scan Barcode
@@ -115,8 +122,8 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
               <motion.button
                 type="submit"
                 disabled={!sku.trim() || loading}
-                whileHover={!sku.trim() || loading ? {} : { scale: 1.02 }}
-                whileTap={!sku.trim() || loading ? {} : { scale: 0.98 }}
+                whileHover={!sku.trim() || loading ? {} : { scale: 1.01 }}
+                whileTap={!sku.trim() || loading ? {} : { scale: 0.99 }}
                 className={`w-full py-4 rounded-2xl font-semibold flex items-center justify-center space-x-2 transition-all duration-300 ${
                   !sku.trim() || loading
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200'

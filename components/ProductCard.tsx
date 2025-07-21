@@ -101,8 +101,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
     if (product.status === 'in_vault') {
       return (
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => handleStatusChange('on_shelf')}
           disabled={isStatusChanging}
           className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-4 rounded-2xl font-medium hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-medium hover:shadow-large disabled:opacity-50 disabled:cursor-not-allowed"
@@ -116,8 +116,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
     } else if (product.status === 'on_shelf') {
       return (
         <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
           onClick={() => handleStatusChange('in_vault')}
           disabled={isStatusChanging}
           className="w-full sephora-gradient text-white py-3 px-4 rounded-2xl font-medium transition-all duration-300 shadow-medium hover:shadow-large disabled:opacity-50 disabled:cursor-not-allowed"
@@ -137,8 +137,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      whileHover={{ scale: 1.02 }}
-      className={`product-card ${
+      whileHover={{ scale: 1.01 }}
+      className={`product-card overflow-hidden ${
         !isActive ? 'opacity-75' : ''
       }`}
     >
@@ -201,12 +201,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Details Button */}
         {onViewDetails && (
-          <motion.button
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={() => onViewDetails(product)}
-            className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-gray-700 p-3 rounded-2xl shadow-medium backdrop-blur-sm z-20 transition-all duration-200"
-          >
+                  <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={() => onViewDetails(product)}
+          className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-gray-700 p-3 rounded-2xl shadow-medium backdrop-blur-sm z-20 transition-all duration-200"
+        >
             <Settings className="w-5 h-5" />
           </motion.button>
         )}
@@ -302,8 +302,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
             {isGuest ? (
               // Guest view - show shopping list button
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onAddToShoppingList?.(product.id)}
                 className="w-full rose-gradient text-white py-4 px-4 rounded-2xl font-semibold transition-all duration-300 shadow-medium hover:shadow-large"
               >
@@ -315,8 +315,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
             ) : (
               // Admin view - show check out button
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => onUseProduct(product.id)}
                 className="w-full sephora-gradient text-white py-4 px-4 rounded-2xl font-semibold transition-all duration-300 shadow-medium hover:shadow-large"
               >

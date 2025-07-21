@@ -172,8 +172,8 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                 {!isEditing && (
                   <>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setIsEditing(true)}
                       className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
                     >
@@ -181,8 +181,8 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                       <span>Edit</span>
                     </motion.button>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={handleDelete}
                       disabled={isDeleting}
                       className="bg-red-500 hover:bg-red-600 disabled:bg-red-300 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
@@ -405,16 +405,16 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
              {isEditing && (
                <div className="flex items-center justify-end space-x-3 pt-6 pb-2">
                  <motion.button
-                   whileHover={{ scale: 1.05 }}
-                   whileTap={{ scale: 0.95 }}
+                   whileHover={{ scale: 1.02 }}
+                   whileTap={{ scale: 0.98 }}
                    onClick={() => setIsEditing(false)}
                    className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
                  >
                    Cancel
                  </motion.button>
                  <motion.button
-                   whileHover={{ scale: 1.05 }}
-                   whileTap={{ scale: 0.95 }}
+                   whileHover={{ scale: 1.02 }}
+                   whileTap={{ scale: 0.98 }}
                    onClick={handleSave}
                    disabled={isSaving}
                    className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-lg flex items-center space-x-2"
