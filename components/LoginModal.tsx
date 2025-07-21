@@ -77,7 +77,7 @@ export default function LoginModal({ isOpen, onClose, onLogin, loading }: LoginM
             className="modal-content"
           >
             {/* Header */}
-            <div className="sephora-gradient p-8 text-white">
+            <div className="sephora-gradient p-8 text-white rounded-t-3xl">
               <div className="flex items-center space-x-4">
                 <div className="p-3 bg-white bg-opacity-20 rounded-2xl">
                   <Sparkles className="h-8 w-8" />
