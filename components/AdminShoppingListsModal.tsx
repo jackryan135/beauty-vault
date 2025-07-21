@@ -116,7 +116,7 @@ export default function AdminShoppingListsModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden"
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-4xl max-h-[90vh] overflow-hidden p-2 sm:p-6"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-sephora-500 to-rose-500 p-6 text-white">

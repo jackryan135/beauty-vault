@@ -52,7 +52,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="modal-content max-w-md p-8"
+            className="modal-content w-full max-w-sm sm:max-w-md p-2 sm:p-8"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-8">

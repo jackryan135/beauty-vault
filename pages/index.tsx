@@ -642,14 +642,15 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4">
+              {/* Header Buttons Responsive Container */}
+              <div className="flex flex-wrap gap-2 overflow-x-auto max-w-full justify-end">
                 {/* Login button when not logged in */}
                 {!user && (
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => setIsLoginModalOpen(true)}
-                    className="btn-primary flex items-center space-x-2"
+                    className="btn-primary flex items-center space-x-2 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                   >
                     <Sparkles className="h-5 w-5" />
                     <span>Login</span>
@@ -663,7 +664,7 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsAdminShoppingListsModalOpen(true)}
-                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <Crown className="h-5 w-5" />
                       <span>All Lists</span>
@@ -675,28 +676,26 @@ export default function Home() {
                         whileTap={{ scale: 0.95 }}
                         onClick={handleClearDatabase}
                         disabled={isClearing}
-                        className="btn-danger flex items-center space-x-2"
+                        className="btn-danger flex items-center space-x-2 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                       >
                         <Trash2 className="h-5 w-5" />
                         <span>{isClearing ? 'Clearing...' : 'Clear DB'}</span>
                       </motion.button>
                     )}
-                    
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsScanOutModalOpen(true)}
-                      className="rose-gradient text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
+                      className="rose-gradient text-white rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <ArrowDown className="h-5 w-5" />
                       <span>Check out by SKU</span>
                     </motion.button>
-                    
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsModalOpen(true)}
-                      className="btn-primary flex items-center space-x-2"
+                      className="btn-primary flex items-center space-x-2 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <Gem className="h-5 w-5" />
                       <span>Add to Vault</span>
@@ -710,17 +709,16 @@ export default function Home() {
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsShoppingListModalOpen(true)}
-                      className="rose-gradient text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
+                      className="rose-gradient text-white rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <ShoppingCart className="h-5 w-5" />
                       <span>Shopping List ({shoppingList?.items?.length || 0})</span>
                     </motion.button>
-                    
                     <motion.button
                       whileHover={{ scale: 1.05 }}
                       whileTap={{ scale: 0.95 }}
                       onClick={() => setIsCheckoutHistoryModalOpen(true)}
-                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <History className="h-5 w-5" />
                       <span>Checkout History</span>
@@ -734,7 +732,7 @@ export default function Home() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={handleLogout}
-                    className="btn-secondary flex items-center space-x-2"
+                    className="btn-secondary flex items-center space-x-2 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                   >
                     <LogOut className="h-5 w-5" />
                     <span>Logout</span>

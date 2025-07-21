@@ -75,7 +75,7 @@ export default function ShoppingListModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-hidden"
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-2xl max-h-[90vh] overflow-hidden p-2 sm:p-6"
           >
             {/* Header */}
             <div className="bg-gradient-to-r from-rose-500 to-pink-500 p-6 text-white">

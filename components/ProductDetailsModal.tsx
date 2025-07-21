@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Save, Edit3, Trash2 } from 'lucide-react'
 import { Product } from '../types/product'
@@ -43,6 +43,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     if (product) {
@@ -57,6 +58,14 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
       })
     }
   }, [product])
+
+  // Scroll content to top and focus when modal opens
+  useEffect(() => {
+    if (isOpen && contentRef.current) {
+      contentRef.current.scrollTop = 0;
+      contentRef.current.focus();
+    }
+  }, [isOpen])
 
   const handleSave = async () => {
     if (!product) return
@@ -127,23 +136,39 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 z-50"
           onClick={onClose}
         >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             exit={{ scale: 0.9, opacity: 0 }}
-            className="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto"
+            className="relative bg-white rounded-2xl shadow-2xl w-full max-w-sm sm:max-w-2xl flex flex-col max-h-screen min-h-0"
             onClick={(e) => e.stopPropagation()}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
+            {/* Header with Close Button (not sticky, always visible) */}
+            <div className="flex-shrink-0 sticky top-0 z-10 bg-white rounded-t-2xl flex items-center justify-between p-4 border-b border-gray-200">
               <div>
-                <h2 className="text-2xl font-bold text-gray-800">Product Details</h2>
-                <p className="text-gray-600">SKU: {product.sku}</p>
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-800">Product Details</h2>
+                <p className="text-gray-600 text-sm sm:text-base">SKU: {product.sku}</p>
               </div>
-              <div className="flex items-center space-x-2">
+              <button
+                onClick={onClose}
+                className="bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-full p-2 shadow-md focus:outline-none focus:ring-2 focus:ring-sephora-400"
+                aria-label="Close"
+              >
+                <X className="w-6 h-6" />
+              </button>
+            </div>
+            {/* Scrollable Content (includes footer) */}
+            <div
+              ref={contentRef}
+              className="flex-1 overflow-y-auto px-2 sm:px-6 pb-4"
+              tabIndex={-1}
+              style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
+            >
+              {/* Action Buttons (Edit/Delete) */}
+              <div className="flex items-center space-x-2 mt-4 mb-6">
                 {!isEditing && (
                   <>
                     <motion.button
@@ -167,19 +192,8 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                     </motion.button>
                   </>
                 )}
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={onClose}
-                  className="bg-gray-200 hover:bg-gray-300 text-gray-700 p-2 rounded-lg"
-                >
-                  <X className="w-5 h-5" />
-                </motion.button>
               </div>
-            </div>
-
-            {/* Content */}
-            <div className="p-6">
+              {/* Existing modal content (form, image, details, etc.) */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Left Column - Image and Basic Info */}
                 <div>
@@ -387,31 +401,30 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                   </div>
                 </div>
               </div>
+             {/* Footer (Edit mode) */}
+             {isEditing && (
+               <div className="flex items-center justify-end space-x-3 pt-6 pb-2">
+                 <motion.button
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                   onClick={() => setIsEditing(false)}
+                   className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
+                 >
+                   Cancel
+                 </motion.button>
+                 <motion.button
+                   whileHover={{ scale: 1.05 }}
+                   whileTap={{ scale: 0.95 }}
+                   onClick={handleSave}
+                   disabled={isSaving}
+                   className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-lg flex items-center space-x-2"
+                 >
+                   <Save className="w-4 h-4" />
+                   <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
+                 </motion.button>
+               </div>
+             )}
             </div>
-
-            {/* Footer */}
-            {isEditing && (
-              <div className="flex items-center justify-end space-x-3 p-6 border-t border-gray-200">
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={() => setIsEditing(false)}
-                  className="px-4 py-2 text-gray-700 bg-gray-200 hover:bg-gray-300 rounded-lg"
-                >
-                  Cancel
-                </motion.button>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleSave}
-                  disabled={isSaving}
-                  className="px-4 py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-blue-300 text-white rounded-lg flex items-center space-x-2"
-                >
-                  <Save className="w-4 h-4" />
-                  <span>{isSaving ? 'Saving...' : 'Save Changes'}</span>
-                </motion.button>
-              </div>
-            )}
           </motion.div>
         </motion.div>
       )}

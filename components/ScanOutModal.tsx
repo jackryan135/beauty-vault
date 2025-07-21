@@ -45,7 +45,7 @@ export default function ScanOutModal({ isOpen, onClose, onScanOut }: ScanOutModa
             initial={{ opacity: 0, scale: 0.9, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 20 }}
-            className="relative bg-white rounded-3xl p-8 max-w-md w-full card-shadow"
+            className="relative bg-white rounded-3xl p-2 sm:p-8 w-full max-w-sm sm:max-w-md card-shadow"
           >
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
