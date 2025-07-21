@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { X, Save, Edit3, Trash2 } from 'lucide-react'
+import { X, Save, Edit3, Trash2, Search } from 'lucide-react'
 import { Product } from '../types/product'
 import { getFallbackImage, getDisplayImageUrl } from '../lib/image-fallback'
+import AIProductSearch from './AIProductSearch'
 
 interface ProductDetailsModalProps {
   isOpen: boolean
@@ -43,6 +44,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   const [isEditing, setIsEditing] = useState(false)
   const [isSaving, setIsSaving] = useState(false)
   const [isDeleting, setIsDeleting] = useState(false)
+  const [showAISearch, setShowAISearch] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
@@ -107,6 +109,71 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
     }
   }
 
+  const handleAIProductFound = async (productInfo: {
+    name: string
+    brand: string
+    price: number
+    image_url: string
+    description?: string
+    size?: string
+    category?: string
+    uploadedImage?: string
+    found?: boolean
+  }) => {
+    if (!product) return
+
+    // Update form data
+    const updatedFormData = {
+      name: productInfo.name,
+      brand: productInfo.brand,
+      price: productInfo.price,
+      image_url: productInfo.uploadedImage || productInfo.image_url,
+      description: productInfo.description || '',
+      size: productInfo.size || '',
+      category: productInfo.category || ''
+    }
+    
+    setFormData(updatedFormData)
+    setShowAISearch(false)
+
+    // Automatically save the product with AI-found information
+    setIsSaving(true)
+    try {
+      const updatedProduct: Partial<Product> = {
+        ...product,
+        name: updatedFormData.name,
+        brand: updatedFormData.brand,
+        price: updatedFormData.price,
+        image_url: updatedFormData.image_url,
+        metadata: {
+          ...product.metadata,
+          description: updatedFormData.description,
+          category: updatedFormData.category,
+          size: updatedFormData.size,
+          source: 'ai_generated' as const, // Mark that this was updated via AI
+          found: productInfo.found === true // Only mark as found if AI actually found it
+        }
+      }
+
+      await onSave(updatedProduct)
+      setIsEditing(false) // Exit edit mode since we've saved
+    } catch (error) {
+      console.error('Error saving product with AI data:', error)
+      // Revert form data if save failed
+      setFormData({
+        name: product.name || '',
+        brand: product.brand || '',
+        price: Number(product.price) || 0,
+        description: product.metadata?.description || '',
+        category: product.metadata?.category || '',
+        size: product.metadata?.size || '',
+        image_url: product.image_url || ''
+      })
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
   const handleDelete = async () => {
     if (!product || !onDelete) return
 
@@ -130,15 +197,16 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   if (!product) return null
 
   return (
-    <AnimatePresence>
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 z-50"
-          onClick={onClose}
-        >
+    <>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-2 z-50"
+            onClick={onClose}
+          >
           <motion.div
             initial={{ scale: 0.9, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
@@ -167,7 +235,7 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
               tabIndex={-1}
               style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}
             >
-              {/* Action Buttons (Edit/Delete) */}
+              {/* Action Buttons (Edit/Delete/AI Search) */}
               <div className="flex items-center space-x-2 mt-4 mb-6">
                 {!isEditing && (
                   <>
@@ -179,6 +247,15 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                     >
                       <Edit3 className="w-4 h-4" />
                       <span>Edit</span>
+                    </motion.button>
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={() => setShowAISearch(true)}
+                      className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center space-x-2"
+                    >
+                      <Search className="w-4 h-4" />
+                      <span>AI Search & Update</span>
                     </motion.button>
                     <motion.button
                       whileHover={{ scale: 1.02 }}
@@ -429,6 +506,17 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
         </motion.div>
       )}
     </AnimatePresence>
+
+      {/* AI Search Modal */}
+      <AnimatePresence>
+        {showAISearch && (
+          <AIProductSearch
+            onProductFound={handleAIProductFound}
+            onClose={() => setShowAISearch(false)}
+          />
+        )}
+      </AnimatePresence>
+    </>
   )
 }
 
