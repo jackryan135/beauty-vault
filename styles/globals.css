@@ -88,15 +88,15 @@
   }
 
   .btn-primary {
-    @apply bg-gradient-to-r from-sephora-500 to-rose-500 text-white px-6 py-3 rounded-2xl font-medium shadow-medium hover:shadow-large transition-all duration-300 transform hover:scale-105 active:scale-95;
+    @apply bg-gradient-to-r from-sephora-500 to-rose-500 text-white px-6 py-3 rounded-2xl font-medium shadow-medium hover:shadow-large transition-all duration-300 transform hover:scale-102 active:scale-98;
   }
 
   .btn-secondary {
-    @apply bg-white text-sephora-600 px-6 py-3 rounded-2xl font-medium border border-sephora-200 shadow-soft hover:shadow-medium transition-all duration-300 transform hover:scale-105 active:scale-95;
+    @apply bg-white text-sephora-600 px-6 py-3 rounded-2xl font-medium border border-sephora-200 shadow-soft hover:shadow-medium transition-all duration-300 transform hover:scale-102 active:scale-98;
   }
 
   .btn-danger {
-    @apply bg-gradient-to-r from-red-500 to-rose-500 text-white px-6 py-3 rounded-2xl font-medium shadow-medium hover:shadow-large transition-all duration-300 transform hover:scale-105 active:scale-95;
+    @apply bg-gradient-to-r from-red-500 to-rose-500 text-white px-6 py-3 rounded-2xl font-medium shadow-medium hover:shadow-large transition-all duration-300 transform hover:scale-102 active:scale-98;
   }
 
   .input-field {

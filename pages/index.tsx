@@ -9,6 +9,7 @@ import LoginModal from '../components/LoginModal'
 import ShoppingListModal from '../components/ShoppingListModal'
 import AdminShoppingListsModal from '../components/AdminShoppingListsModal'
 import CheckoutHistoryModal from '../components/CheckoutHistoryModal'
+import BarcodeScanner from '../components/BarcodeScanner'
 import { Product, User, ShoppingList, LoginRequest } from '../types/product'
 import toast from 'react-hot-toast'
 import Head from 'next/head'
@@ -31,6 +32,20 @@ export default function Home() {
   const [shoppingList, setShoppingList] = useState<ShoppingList | null>(null)
   const [allShoppingLists, setAllShoppingLists] = useState<ShoppingList[]>([])
   const [loginLoading, setLoginLoading] = useState(false)
+  const [showScanner, setShowScanner] = useState(false)
+  const [scannerKey, setScannerKey] = useState(0)
+
+  const handleBarcodeDetected = (code: string) => {
+    setSearchTerm(code)
+    setShowScanner(false)
+  }
+
+  // Cleanup scanner when user logs out
+  useEffect(() => {
+    if (!user && showScanner) {
+      setShowScanner(false)
+    }
+  }, [user, showScanner])
 
   useEffect(() => {
     checkAuth()
@@ -642,14 +657,15 @@ export default function Home() {
                 </div>
               </div>
               
-              <div className="flex items-center space-x-4">
+              {/* Header Buttons Responsive Container */}
+              <div className="flex flex-wrap gap-2 overflow-hidden max-w-full justify-end">
                 {/* Login button when not logged in */}
                 {!user && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => setIsLoginModalOpen(true)}
-                    className="btn-primary flex items-center space-x-2"
+                    className="btn-primary flex items-center space-x-2 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                   >
                     <Sparkles className="h-5 w-5" />
                     <span>Login</span>
@@ -660,10 +676,10 @@ export default function Home() {
                 {user?.role === 'admin' && (
                   <>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setIsAdminShoppingListsModalOpen(true)}
-                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <Crown className="h-5 w-5" />
                       <span>All Lists</span>
@@ -671,32 +687,30 @@ export default function Home() {
                     {/* Only show Clear DB button if not in production */}
                     {process.env.NODE_ENV !== 'production' && (
                       <motion.button
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
                         onClick={handleClearDatabase}
                         disabled={isClearing}
-                        className="btn-danger flex items-center space-x-2"
+                        className="btn-danger flex items-center space-x-2 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                       >
                         <Trash2 className="h-5 w-5" />
                         <span>{isClearing ? 'Clearing...' : 'Clear DB'}</span>
                       </motion.button>
                     )}
-                    
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setIsScanOutModalOpen(true)}
-                      className="rose-gradient text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
+                      className="rose-gradient text-white rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <ArrowDown className="h-5 w-5" />
                       <span>Check out by SKU</span>
                     </motion.button>
-                    
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setIsModalOpen(true)}
-                      className="btn-primary flex items-center space-x-2"
+                      className="btn-primary flex items-center space-x-2 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <Gem className="h-5 w-5" />
                       <span>Add to Vault</span>
@@ -707,20 +721,19 @@ export default function Home() {
                 {user?.role === 'guest' && (
                   <>
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setIsShoppingListModalOpen(true)}
-                      className="rose-gradient text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
+                      className="rose-gradient text-white rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <ShoppingCart className="h-5 w-5" />
                       <span>Shopping List ({shoppingList?.items?.length || 0})</span>
                     </motion.button>
-                    
                     <motion.button
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
                       onClick={() => setIsCheckoutHistoryModalOpen(true)}
-                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white px-6 py-3 rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300"
+                      className="bg-gradient-to-r from-blue-500 to-indigo-500 text-white rounded-2xl font-medium flex items-center space-x-2 shadow-medium hover:shadow-large transition-all duration-300 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                     >
                       <History className="h-5 w-5" />
                       <span>Checkout History</span>
@@ -731,10 +744,10 @@ export default function Home() {
                 {/* Logout button */}
                 {user && (
                   <motion.button
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={handleLogout}
-                    className="btn-secondary flex items-center space-x-2"
+                    className="btn-secondary flex items-center space-x-2 text-sm px-3 py-2 sm:px-6 sm:py-3 min-w-[120px] sm:min-w-[0]"
                   >
                     <LogOut className="h-5 w-5" />
                     <span>Logout</span>
@@ -748,21 +761,30 @@ export default function Home() {
         {/* Search Bar */}
         {user && (
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <div className="relative">
+            <div className="relative flex items-center">
               <Search className="absolute left-6 top-1/2 transform -translate-y-1/2 text-sephora-400 h-6 w-6" />
               <input
                 type="text"
                 placeholder="Search products by name, SKU, or brand..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="input-field pl-16 pr-6 py-5 text-lg"
+                className="input-field pl-16 pr-6 py-5 text-lg flex-1"
               />
+              {/* Mobile-only Scan Barcode button */}
+              <button
+                type="button"
+                className="ml-4 md:hidden bg-sephora-500 hover:bg-sephora-600 text-white px-4 py-5 rounded-2xl flex items-center gap-2 transition-all duration-200 shadow-lg hover:shadow-xl"
+                onClick={() => { setScannerKey(prev => prev + 1); setShowScanner(true); }}
+              >
+                <span role="img" aria-label="Scan">📷</span>
+                <span className="hidden sm:inline">Scan</span>
+              </button>
             </div>
           </div>
         )}
 
         {/* Content */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 overflow-hidden">
           {!user ? (
             // Not logged in - show login prompt
             <motion.div
@@ -780,8 +802,8 @@ export default function Home() {
                 Please log in to view and manage products.
               </p>
               <motion.button
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
                 onClick={() => setIsLoginModalOpen(true)}
                 className="btn-primary flex items-center space-x-3 mx-auto text-lg px-10 py-4"
               >
@@ -806,7 +828,7 @@ export default function Home() {
                       Available Products ({onShelfProducts.length})
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 overflow-hidden">
                     {onShelfProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -857,7 +879,7 @@ export default function Home() {
                       In Your Vault ({inVaultProducts.length})
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 overflow-hidden">
                     {inVaultProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -888,7 +910,7 @@ export default function Home() {
                       On Shelf ({onShelfProducts.length})
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 overflow-hidden">
                     {onShelfProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -918,7 +940,7 @@ export default function Home() {
                       Used Up ({usedUpProducts.length})
                     </h2>
                   </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8 overflow-hidden">
                     {usedUpProducts.map((product) => (
                       <ProductCard
                         key={product.id}
@@ -1029,6 +1051,15 @@ export default function Home() {
           onClose={() => setIsCheckoutHistoryModalOpen(false)}
           user={user}
         />
+
+        {/* Barcode Scanner Modal */}
+        {showScanner && (
+          <BarcodeScanner
+            key={scannerKey}
+            onDetected={handleBarcodeDetected}
+            onClose={() => setShowScanner(false)}
+          />
+        )}
       </div>
     </>
   )
