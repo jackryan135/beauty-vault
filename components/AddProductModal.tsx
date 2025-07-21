@@ -15,6 +15,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
   const [sku, setSku] = useState('')
   const [loading, setLoading] = useState(false)
   const [showScanner, setShowScanner] = useState(false)
+  const [scannerKey, setScannerKey] = useState(0)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -43,7 +44,10 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={() => {
+              setShowScanner(false);
+              setTimeout(onClose, 300); // allow scanner cleanup before parent closes
+            }}
             className="absolute inset-0 bg-black bg-opacity-50 backdrop-blur-sm"
           />
 
@@ -65,7 +69,10 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
                 </h2>
               </div>
               <button
-                onClick={onClose}
+                onClick={() => {
+                  setShowScanner(false);
+                  setTimeout(onClose, 300);
+                }}
                 className="text-gray-400 hover:text-gray-600 transition-colors p-2 hover:bg-gray-100 rounded-xl"
               >
                 <X className="h-6 w-6" />
@@ -93,7 +100,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
                   <button
                     type="button"
                     className="ml-2 md:hidden btn-primary px-4 py-2 flex items-center gap-2"
-                    onClick={() => setShowScanner(true)}
+                    onClick={() => { setScannerKey(prev => prev + 1); setShowScanner(false); setTimeout(() => setShowScanner(true), 50); }}
                   >
                     <span role="img" aria-label="Scan">📷</span>
                     Scan Barcode
@@ -156,6 +163,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
             {/* Barcode Scanner Modal */}
             {showScanner && (
               <BarcodeScanner
+                key={scannerKey}
                 onDetected={handleBarcodeDetected}
                 onClose={() => setShowScanner(false)}
               />
