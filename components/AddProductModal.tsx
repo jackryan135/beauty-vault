@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { X, Hash, Loader, Gem, Sparkles } from 'lucide-react'
+import BarcodeScanner from './BarcodeScanner';
 
 interface AddProductModalProps {
   isOpen: boolean
@@ -13,6 +14,7 @@ interface AddProductModalProps {
 export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddProductModalProps) {
   const [sku, setSku] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showScanner, setShowScanner] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -25,6 +27,11 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
     } finally {
       setLoading(false)
     }
+  }
+
+  const handleBarcodeDetected = (code: string) => {
+    setSku(code)
+    setShowScanner(false)
   }
 
   return (
@@ -71,7 +78,7 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
                 <label htmlFor="sku" className="block text-base font-semibold text-gray-700 mb-3">
                   Product SKU
                 </label>
-                <div className="relative">
+                <div className="relative flex items-center">
                   <Hash className="absolute left-4 top-1/2 transform -translate-y-1/2 text-sephora-400 h-5 w-5" />
                   <input
                     type="text"
@@ -79,9 +86,18 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
                     value={sku}
                     onChange={(e) => setSku(e.target.value)}
                     placeholder="Enter product SKU..."
-                    className="input-field pl-12 pr-4 py-4 text-base focus:ring-2 focus:ring-sephora-100"
+                    className="input-field pl-12 pr-4 py-4 text-base focus:ring-2 focus:ring-sephora-100 flex-1"
                     disabled={loading}
                   />
+                  {/* Mobile-only Scan Barcode button */}
+                  <button
+                    type="button"
+                    className="ml-2 md:hidden btn-primary px-4 py-2 flex items-center gap-2"
+                    onClick={() => setShowScanner(true)}
+                  >
+                    <span role="img" aria-label="Scan">📷</span>
+                    Scan Barcode
+                  </button>
                 </div>
                 <p className="mt-3 text-sm text-gray-600">
                   We&apos;ll automatically generate product details for your collection
@@ -136,6 +152,14 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
                 </li>
               </ul>
             </div>
+
+            {/* Barcode Scanner Modal */}
+            {showScanner && (
+              <BarcodeScanner
+                onDetected={handleBarcodeDetected}
+                onClose={() => setShowScanner(false)}
+              />
+            )}
           </motion.div>
         </div>
       )}
