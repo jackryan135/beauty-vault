@@ -50,9 +50,6 @@ const nextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
   },
-  experimental: {
-    // optimizeCss: true, // Disabled due to critters dependency issues
-  },
   env: {
     CUSTOM_KEY: process.env.CUSTOM_KEY,
   },
