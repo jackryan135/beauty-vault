@@ -87,6 +87,10 @@ module.exports = {
         '88': '22rem',
         '128': '32rem',
       },
+      scale: {
+        '98': '0.98',
+        '102': '1.02',
+      },
       borderRadius: {
         '4xl': '2rem',
         '5xl': '2.5rem',
