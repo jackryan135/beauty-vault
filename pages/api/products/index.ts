@@ -61,7 +61,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     }
   } else if (req.method === 'POST') {
     try {
-      const { sku } = req.body
+      const { sku, productInfo: providedProductInfo } = req.body
 
       if (!sku) {
         return res.status(400).json({ error: 'SKU is required' })
@@ -92,9 +92,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Create new product - FIRST TIME ADD
-      console.log(`Fetching product information for SKU: ${sku}`)
-      const productFetcher = ProductFetcher.getInstance()
-      const productInfo = await productFetcher.fetchProduct(sku)
+      let productInfo
+      
+      if (providedProductInfo) {
+        // Use provided product information from AI search
+        console.log(`Using provided product information for SKU: ${sku}`)
+        productInfo = {
+          name: providedProductInfo.name,
+          brand: providedProductInfo.brand,
+          price: providedProductInfo.price || 0,
+          image_url: providedProductInfo.image_url || providedProductInfo.uploadedImage || '',
+          description: providedProductInfo.description,
+          category: providedProductInfo.category,
+          size: providedProductInfo.size,
+          rating: providedProductInfo.rating,
+          reviews: providedProductInfo.reviews,
+          ingredients: providedProductInfo.ingredients,
+          found: providedProductInfo.found !== undefined ? providedProductInfo.found : false,
+          source: 'ai_search'
+        }
+      } else {
+        // Fetch product information using ProductFetcher
+        console.log(`Fetching product information for SKU: ${sku}`)
+        const productFetcher = ProductFetcher.getInstance()
+        productInfo = await productFetcher.fetchProduct(sku)
+      }
 
       const { rows } = await db.query(
         'INSERT INTO products (sku, name, brand, price, image_url, quantity, is_active, status, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
@@ -114,7 +136,8 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
             size: productInfo.size,
             rating: productInfo.rating,
             reviews: productInfo.reviews,
-            source: productInfo.description ? 'real_data' : 'ai_generated',
+            ingredients: productInfo.ingredients,
+            source: productInfo.source || (productInfo.found ? 'real_data' : 'ai_generated'),
             found: productInfo.found
           }
         ]
