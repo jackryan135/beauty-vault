@@ -45,7 +45,7 @@ export async function uploadImage(
           success: false,
           imageUrl: '',
           fileName: uniqueFileName,
-          error: error.message
+          error: `Supabase error: ${error.message}. Please check storage policies.`
         }
       }
 
