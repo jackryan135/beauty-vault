@@ -31,7 +31,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
   
   const isActive = product.is_active
   const metadata = product.metadata || {}
-  const isFound = metadata.source === 'real_data' || metadata.found === true
+  const isFound = metadata.source === 'real_data' || metadata.source === 'barcode_lookup' || metadata.found === true
   
   // Debug logging
   useEffect(() => {
@@ -49,6 +49,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
     originalImageUrl: product.image_url,
     isFound,
     source: metadata.source,
+    found: metadata.found,
     imageLoaded,
     imageError,
     status: product.status
@@ -105,7 +106,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           whileTap={{ scale: 0.98 }}
           onClick={() => handleStatusChange('on_shelf')}
           disabled={isStatusChanging}
-          className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-4 rounded-2xl font-medium hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-medium hover:shadow-large disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-gradient-to-r from-blue-500 to-indigo-500 text-white py-3 px-4 rounded-xl font-medium hover:from-blue-600 hover:to-indigo-600 transition-all duration-300 shadow-medium hover:shadow-large disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="flex items-center justify-center gap-2">
             <Share2 className="w-4 h-4" />
@@ -120,7 +121,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
           whileTap={{ scale: 0.98 }}
           onClick={() => handleStatusChange('in_vault')}
           disabled={isStatusChanging}
-          className="w-full sephora-gradient text-white py-3 px-4 rounded-2xl font-medium transition-all duration-300 shadow-medium hover:shadow-large disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full sephora-gradient text-white py-3 px-4 rounded-xl font-medium transition-all duration-300 shadow-medium hover:shadow-large disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="flex items-center justify-center gap-2">
             <Gem className="w-4 h-4" />
@@ -138,12 +139,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
       whileHover={{ scale: 1.01 }}
-      className={`product-card overflow-hidden ${
+      className={`product-card overflow-hidden bg-white rounded-2xl shadow-medium hover:shadow-large transition-all duration-300 ${
         !isActive ? 'opacity-75' : ''
       }`}
     >
       {/* Product Image */}
-      <div className="relative h-56 overflow-hidden bg-gradient-to-br from-sephora-100 to-rose-100">
+      <div className="relative h-48 overflow-hidden bg-gradient-to-br from-sephora-100 to-rose-100">
         {/* Loading State */}
         {!imageLoaded && !imageError && (
           <div className="w-full h-full flex items-center justify-center relative z-10">
@@ -186,12 +187,12 @@ const ProductCard: React.FC<ProductCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent z-0" />
         
         {/* Status Badge */}
-        <div className="absolute top-4 right-4 z-20">
+        <div className="absolute top-3 right-3 z-20">
           {getStatusBadge()}
         </div>
 
         {/* Source Badge */}
-        <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-xs font-medium z-20 shadow-medium ${
+        <div className={`absolute top-3 left-3 px-2 py-1 rounded-full text-xs font-medium z-20 shadow-medium ${
           isFound 
             ? 'bg-gradient-to-r from-green-500 to-emerald-500 text-white' 
             : 'bg-gradient-to-r from-orange-500 to-amber-500 text-white'
@@ -201,32 +202,32 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Details Button */}
         {onViewDetails && (
-                  <motion.button
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          onClick={() => onViewDetails(product)}
-          className="absolute bottom-4 right-4 bg-white/95 hover:bg-white text-gray-700 p-3 rounded-2xl shadow-medium backdrop-blur-sm z-20 transition-all duration-200"
-        >
-            <Settings className="w-5 h-5" />
+          <motion.button
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+            onClick={() => onViewDetails(product)}
+            className="absolute bottom-3 right-3 bg-white/95 hover:bg-white text-gray-700 p-2 rounded-xl shadow-medium backdrop-blur-sm z-20 transition-all duration-200"
+          >
+            <Settings className="w-4 h-4" />
           </motion.button>
         )}
       </div>
 
       {/* Product Info */}
-      <div className="p-8">
+      <div className="p-6">
         {/* Brand and Name */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Sparkles className="w-4 h-4 text-sephora-500" />
             <span className="text-sm font-semibold text-sephora-600">{product.brand}</span>
           </div>
-          <h3 className="text-xl font-bold text-gray-800 line-clamp-2 leading-tight">{product.name}</h3>
+          <h3 className="text-lg font-bold text-gray-800 line-clamp-2 leading-tight mb-2">{product.name}</h3>
         </div>
 
         {/* Not Found Warning */}
         {!isFound && (
-          <div className="mb-4 p-4 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-2xl">
-            <div className="flex items-center gap-2 text-orange-700 mb-2">
+          <div className="mb-4 p-3 bg-gradient-to-r from-orange-50 to-amber-50 border border-orange-200 rounded-xl">
+            <div className="flex items-center gap-2 text-orange-700 mb-1">
               <AlertCircle className="w-4 h-4" />
               <span className="text-sm font-semibold">Product information not found</span>
             </div>
@@ -242,18 +243,16 @@ const ProductCard: React.FC<ProductCardProps> = ({
         )}
 
         {/* Category and Size */}
-        <div className="flex items-center gap-4 mb-4 text-sm text-gray-500">
+        <div className="flex flex-wrap items-center gap-2 mb-4">
           {metadata.category && (
-            <div className="flex items-center gap-1">
-              <span className="bg-sephora-100 text-sephora-700 px-3 py-1 rounded-full text-xs font-medium">
-                {metadata.category}
-              </span>
-            </div>
+            <span className="bg-sephora-100 text-sephora-700 px-3 py-1 rounded-full text-xs font-medium">
+              {metadata.category}
+            </span>
           )}
           {metadata.size && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 bg-gray-100 text-gray-700 px-3 py-1 rounded-full text-xs font-medium">
               <Package className="w-3 h-3" />
-              <span className="font-medium">{metadata.size}</span>
+              <span>{metadata.size}</span>
             </div>
           )}
         </div>
@@ -262,7 +261,7 @@ const ProductCard: React.FC<ProductCardProps> = ({
         {metadata.rating && metadata.rating > 0 && (
           <div className="flex items-center gap-3 mb-4">
             <div className="flex items-center gap-1">
-              <Star className="w-5 h-5 text-gradient-gold fill-current" />
+              <Star className="w-4 h-4 text-gradient-gold fill-current" />
               <span className="text-sm font-bold text-gray-700">{metadata.rating}</span>
             </div>
             {metadata.reviews && metadata.reviews > 0 && (
@@ -274,23 +273,23 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        {/* Price and Quantity */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="text-3xl font-bold text-gradient">
+        {/* Price and SKU */}
+        <div className="mb-4">
+          <div className="text-2xl font-bold text-gradient mb-1">
             {product.price > 0 ? `$${product.price}` : 'Price Unknown'}
           </div>
-          <div className="text-sm text-gray-500 font-medium">
+          <div className="text-xs text-gray-500 font-medium">
             SKU: {product.sku}
           </div>
         </div>
 
         {/* Quantity and Usage Info */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="text-sm text-gray-600">
+        <div className="flex items-center justify-between mb-6 text-sm text-gray-600">
+          <div>
             <span className="font-semibold">Quantity:</span> {product.quantity}
           </div>
           {metadata.entry_count && (
-            <div className="text-sm text-gray-600">
+            <div>
               <span className="font-semibold">Added:</span> {metadata.entry_count} time{metadata.entry_count > 1 ? 's' : ''}
             </div>
           )}
@@ -298,17 +297,17 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Action Buttons */}
         {isActive && product.quantity > 0 && (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {isGuest ? (
               // Guest view - show shopping list button
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onAddToShoppingList?.(product.id)}
-                className="w-full rose-gradient text-white py-4 px-4 rounded-2xl font-semibold transition-all duration-300 shadow-medium hover:shadow-large"
+                className="w-full rose-gradient text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-medium hover:shadow-large"
               >
                 <div className="flex items-center justify-center gap-2">
-                  <ShoppingCart className="w-5 h-5" />
+                  <ShoppingCart className="w-4 h-4" />
                   Add to Shopping List
                 </div>
               </motion.button>
@@ -318,10 +317,10 @@ const ProductCard: React.FC<ProductCardProps> = ({
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => onUseProduct(product.id)}
-                className="w-full sephora-gradient text-white py-4 px-4 rounded-2xl font-semibold transition-all duration-300 shadow-medium hover:shadow-large"
+                className="w-full sephora-gradient text-white py-3 px-4 rounded-xl font-semibold transition-all duration-300 shadow-medium hover:shadow-large"
               >
                 <div className="flex items-center justify-center gap-2">
-                  <Zap className="w-5 h-5" />
+                  <Zap className="w-4 h-4" />
                   Check out
                 </div>
               </motion.button>
@@ -334,9 +333,9 @@ const ProductCard: React.FC<ProductCardProps> = ({
 
         {/* Used Up Message */}
         {!isActive && (
-          <div className="text-center py-4 px-6 bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl border border-gray-200">
+          <div className="text-center py-4 px-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl border border-gray-200">
             <div className="flex items-center justify-center gap-2 text-gray-600 mb-2">
-              <Heart className="w-5 h-5" />
+              <Heart className="w-4 h-4" />
               <span className="font-semibold">Used Up</span>
             </div>
             {metadata.last_used && (

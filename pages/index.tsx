@@ -373,14 +373,17 @@ export default function Home() {
     }
   }
 
-  const handleAddProduct = async (sku: string) => {
+  const handleAddProduct = async (sku: string, productInfo?: any) => {
     try {
       const response = await fetch('/api/products', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ sku }),
+        body: JSON.stringify({ 
+          sku,
+          productInfo: productInfo || undefined
+        }),
       })
 
       if (response.ok) {

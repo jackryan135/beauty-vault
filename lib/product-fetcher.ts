@@ -14,6 +14,7 @@ export interface ProductData {
   rating?: number
   reviews?: number
   found?: boolean
+  source?: 'real_data' | 'ai_generated' | 'barcode_lookup' | 'basic_info'
 }
 
 /**
@@ -156,7 +157,8 @@ export class ProductFetcher {
           category: this.determineCategory(cleaned.name) || this.mapCategory(item.category) || enrichedInfo.category,
           size: extractedSize || enrichedInfo.size || this.generateSize(),
           ingredients: enrichedInfo.ingredients,
-          found: true
+          found: true,
+          source: 'barcode_lookup'
         }
       }
     } catch (error) {
@@ -219,7 +221,8 @@ export class ProductFetcher {
           category: this.determineCategory(cleaned.name) || this.mapCategory(product.categories_tags?.[0]) || enrichedInfo.category,
           size: extractedSize || enrichedInfo.size || this.generateSize(),
           ingredients: enrichedInfo.ingredients,
-          found: true
+          found: true,
+          source: 'barcode_lookup'
         }
       }
     } catch (error) {
@@ -282,7 +285,8 @@ export class ProductFetcher {
           category: this.determineCategory(cleaned.name) || this.mapCategory(product.category) || enrichedInfo.category,
           size: extractedSize || enrichedInfo.size || this.generateSize(),
           ingredients: enrichedInfo.ingredients,
-          found: true
+          found: true,
+          source: 'barcode_lookup'
         }
       }
     } catch (error) {
@@ -383,7 +387,8 @@ export class ProductFetcher {
         size: '1 oz',
         rating: 4.5,
         reviews: 1247,
-        found: true
+        found: true,
+        source: 'real_data'
       },
       'GLOSSIER001': {
         name: 'Boy Brow',
@@ -395,7 +400,8 @@ export class ProductFetcher {
         size: '0.1 oz',
         rating: 4.7,
         reviews: 8923,
-        found: true
+        found: true,
+        source: 'real_data'
       },
       'CHARLOTTE001': {
         name: 'Magic Cream',
@@ -407,7 +413,8 @@ export class ProductFetcher {
         size: '1.7 oz',
         rating: 4.6,
         reviews: 2156,
-        found: true
+        found: true,
+        source: 'real_data'
       },
       'RARE001': {
         name: 'Liquid Touch Brightening Concealer',
@@ -419,7 +426,8 @@ export class ProductFetcher {
         size: '0.2 oz',
         rating: 4.4,
         reviews: 3421,
-        found: true
+        found: true,
+        source: 'real_data'
       }
     }
 
@@ -451,7 +459,8 @@ export class ProductFetcher {
           size: extractedSize || this.generateSize(),
           rating: this.generateRating(),
           reviews: this.generateReviewCount(),
-          found: true
+          found: true,
+          source: 'ai_generated'
         }
       }
     } catch (error) {
@@ -472,7 +481,8 @@ export class ProductFetcher {
       image_url: `https://placehold.co/400x400/fce7f3/ec4899?text=Product%20${encodeURIComponent(sku)}`,
       description: 'Product information not found. Please verify the SKU or add product details manually.',
       category: 'Unknown',
-      found: false
+      found: false,
+      source: 'basic_info'
     }
   }
 

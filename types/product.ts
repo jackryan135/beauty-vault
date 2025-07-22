@@ -12,7 +12,7 @@ export interface Product {
     entry_count?: number
     last_used?: string
     usage_count?: number
-    source?: 'real_data' | 'ai_generated'
+    source?: 'real_data' | 'ai_generated' | 'barcode_lookup' | 'basic_info'
     description?: string
     category?: string
     size?: string

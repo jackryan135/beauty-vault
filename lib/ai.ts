@@ -10,6 +10,7 @@ interface AIProductInfo {
   found?: boolean
   size?: string
   category?: string
+  description?: string
 }
 
 /**
@@ -47,9 +48,9 @@ async function searchForRealProductWithGemini(sku: string): Promise<AIProductInf
 
   const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite-preview-06-17' })
   
-  const prompt = `Search for a REAL beauty product with SKU: ${sku}. 
+  const prompt = `Search for a REAL beauty product with UPC: ${sku}. 
 
-  If you find information about a real beauty product with this SKU, return ONLY a valid JSON object:
+  If you find information about a real beauty product with this UPC, return ONLY a valid JSON object:
   {
     "name": "Exact Product Name",
     "brand": "Brand Name", 
@@ -58,7 +59,7 @@ async function searchForRealProductWithGemini(sku: string): Promise<AIProductInf
     "found": true
   }
 
-  If you cannot find a real product with this SKU, return:
+  If you cannot find a real product with this UPC, return:
   {
     "name": "Product Not Found",
     "brand": "Unknown",
@@ -283,6 +284,7 @@ export async function enrichProductInfo(name: string, brand: string): Promise<{
   size?: string
   category?: string
   ingredients?: string[]
+  cleanedName?: string
 }> {
   try {
     if (!genAI || !process.env.GEMINI_API_KEY) {
@@ -293,10 +295,11 @@ export async function enrichProductInfo(name: string, brand: string): Promise<{
     
     const prompt = `I have a beauty product with name: "${name}" and brand: "${brand}". 
 
-Please provide additional information about this product. Return ONLY a valid JSON object with the following structure:
+Please provide additional information about this product and clean up the product name. Return ONLY a valid JSON object with the following structure:
 
 {
-  "description": "A brief, accurate description of what this product is and what it does",
+  "cleanedName": "Clean, professional product name without extra text",
+  "description": "A detailed, accurate description of what this product is, what it does, and its key benefits",
   "price": 25.99,
   "size": "1 oz",
   "category": "Skincare",
@@ -304,13 +307,15 @@ Please provide additional information about this product. Return ONLY a valid JS
 }
 
 Rules:
+- cleanedName: Remove marketing text, extra words, and clean up the product name to be professional
+- description: Provide a comprehensive description including benefits, texture, and usage
 - Only include fields where you can provide accurate information
 - For price, provide a reasonable retail price in USD (0 if unknown)
 - For size, extract from the product name or provide a common size for this type of product
 - For category, choose from: Skincare, Makeup, Hair Care, Fragrance, Body Care, Tools & Accessories, Beauty
-- For ingredients, only include if you're confident about the actual ingredients
+- For ingredients, only include key active ingredients if you're confident about them
 - If you're not sure about any field, omit it from the JSON
-- Keep descriptions concise and accurate
+- Keep descriptions informative but concise
 - Do not invent information you're not confident about
 
 If you cannot find reliable information about this specific product, return an empty object: {}`
@@ -329,6 +334,188 @@ If you cannot find reliable information about this specific product, return an e
   }
   
   return {}
+}
+
+/**
+ * Searches for product information by name and brand using AI
+ */
+export async function searchProductByNameAndBrand(name: string, brand: string): Promise<AIProductInfo | null> {
+  try {
+    if (!genAI || !process.env.GEMINI_API_KEY) {
+      return null
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite-preview-06-17' })
+    
+    const prompt = `Search for a REAL beauty product with name: "${name}" and brand: "${brand}". 
+
+  If you find information about a real beauty product with this name and brand, return ONLY a valid JSON object:
+  {
+    "name": "Exact Product Name",
+    "brand": "Brand Name", 
+    "price": 25.99,
+    "image_url": "https://placehold.co/400x400/fce7f3/ec4899?text=Product%20Name",
+    "found": true,
+    "description": "Brief product description",
+    "size": "1 oz",
+    "category": "Skincare"
+  }
+
+  If you cannot find a real product with this name and brand, return:
+  {
+    "name": "Product Not Found",
+    "brand": "Unknown",
+    "price": 0,
+    "image_url": "https://placehold.co/400x400/fce7f3/ec4899?text=Product%20Not%20Found",
+    "found": false
+  }
+
+  IMPORTANT: 
+  - Only return information about REAL products that actually exist
+  - Do not invent or generate fictional products
+  - If you're not sure about a product, mark it as not found
+  - For price, provide a reasonable retail price in USD (0 if unknown)
+  - For category, choose from: Skincare, Makeup, Hair Care, Fragrance, Body Care, Tools & Accessories, Beauty
+  - Keep descriptions concise and accurate`
+
+    const result = await model.generateContent(prompt)
+    const response = await result.response
+    const text = response.text()
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      const productInfo = JSON.parse(jsonMatch[0])
+      
+      if (productInfo.found === false) {
+        return {
+          name: 'Product Not Found',
+          brand: 'Unknown',
+          price: 0,
+          image_url: `https://placehold.co/400x400/fce7f3/ec4899?text=Product%20Not%20Found`,
+          found: false
+        }
+      }
+      
+      if (productInfo.found === true && productInfo.name && productInfo.brand) {
+        const imageUrl = await getBestImageUrl(
+          productInfo.name,
+          productInfo.brand,
+          productInfo.image_url
+        )
+        
+        return {
+          name: productInfo.name,
+          brand: productInfo.brand,
+          price: Math.max(0, Math.min(1000, Number(productInfo.price) || 0)),
+          image_url: imageUrl,
+          description: productInfo.description || '',
+          size: productInfo.size || '',
+          category: productInfo.category || '',
+          found: true
+        }
+      }
+    }
+    
+    throw new Error('Invalid JSON response from Gemini')
+  } catch (error) {
+    console.error('Error searching product by name and brand:', error)
+    return null
+  }
+}
+
+/**
+ * Parses product information from an uploaded image using Gemini Vision
+ */
+export async function parseProductFromImage(imageBase64: string): Promise<{
+  name?: string
+  brand?: string
+  description?: string
+  category?: string
+  size?: string
+  price?: number
+  upc?: string
+  found: boolean
+}> {
+  try {
+    if (!genAI || !process.env.GEMINI_API_KEY) {
+      return { found: false }
+    }
+
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash-lite-preview-06-17' })
+    
+    const prompt = `Analyze this beauty product image and extract product information.
+
+  Look for:
+  - Product name
+  - Brand name
+  - Product description/type
+  - Size/volume
+  - Any visible price information
+  - Product category (Skincare, Makeup, Hair Care, Fragrance, Body Care, Tools & Accessories, Beauty)
+  - UPC/barcode number (if visible)
+
+  Return ONLY a valid JSON object:
+  {
+    "name": "Exact Product Name",
+    "brand": "Brand Name",
+    "description": "Brief description of what this product is",
+    "category": "Product Category",
+    "size": "Size/volume if visible",
+    "price": 25.99,
+    "upc": "123456789012",
+    "found": true
+  }
+
+  If you cannot identify the product clearly, return:
+  {
+    "found": false
+  }
+
+  IMPORTANT:
+  - Only return information you can clearly see or infer from the image
+  - Do not invent information
+  - For category, choose from: Skincare, Makeup, Hair Care, Fragrance, Body Care, Tools & Accessories, Beauty
+  - Keep descriptions concise and accurate
+  - If price is not visible, use 0
+  - If UPC/barcode is visible, include it as a string of numbers
+  - If no UPC is visible, omit the upc field`
+
+    const imagePart = {
+      inlineData: {
+        data: imageBase64,
+        mimeType: 'image/jpeg'
+      }
+    }
+
+    const result = await model.generateContent([prompt, imagePart])
+    const response = await result.response
+    const text = response.text()
+    
+    const jsonMatch = text.match(/\{[\s\S]*\}/)
+    if (jsonMatch) {
+      const productInfo = JSON.parse(jsonMatch[0])
+      
+      if (productInfo.found === false) {
+        return { found: false }
+      }
+      
+      return {
+        name: productInfo.name || '',
+        brand: productInfo.brand || '',
+        description: productInfo.description || '',
+        category: productInfo.category || '',
+        size: productInfo.size || '',
+        price: Math.max(0, Math.min(1000, Number(productInfo.price) || 0)),
+        upc: productInfo.upc || '',
+        found: true
+      }
+    }
+    
+    return { found: false }
+  } catch (error) {
+    console.error('Error parsing product from image:', error)
+    return { found: false }
+  }
 }
 
 /**

@@ -42,6 +42,7 @@ The application will automatically use the mock database for development.
 - ✅ **Multiple image sources** with CORS checking
 - ✅ **Intelligent product fetching** from multiple APIs
 - ✅ **Session persistence** (2-hour login sessions)
+- ✅ **Hybrid image storage** (local for dev, Supabase for production)
 
 ## 🛠️ Tech Stack
 
@@ -52,6 +53,7 @@ The application will automatically use the mock database for development.
 - **Database**: PostgreSQL with connection pooling
 - **AI**: Google Gemini integration
 - **Image Sources**: Sephora, placeholder services with CORS checking
+- **Storage**: Hybrid system (local files for dev, Supabase storage for production)
 - **Deployment**: Vercel-ready
 
 ## 🎨 Design
@@ -118,6 +120,12 @@ Inspired by Sephora's elegant design language:
    ```
 4. Deploy!
 
+### Image Storage Setup
+For production image uploads, you'll need to set up Supabase storage:
+1. Follow the **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** guide
+2. Add Supabase environment variables to Vercel
+3. Images will automatically use Supabase storage in production
+
 ### Local Production Build
 ```bash
 npm run build
@@ -128,6 +136,7 @@ npm start
 
 - **[SETUP.md](./SETUP.md)** - Detailed setup and configuration instructions
 - **[VERCEL_DEPLOYMENT.md](./VERCEL_DEPLOYMENT.md)** - Comprehensive Vercel deployment guide with authentication system
+- **[SUPABASE_SETUP.md](./SUPABASE_SETUP.md)** - Supabase storage setup for production image uploads
 - **[DEVELOPMENT.md](./DEVELOPMENT.md)** - Development guide, architecture, and technical details
 - **[CONTRIBUTING.md](./CONTRIBUTING.md)** - How to contribute to the project
 - **[CODE_OF_CONDUCT.md](./CODE_OF_CONDUCT.md)** - Community guidelines

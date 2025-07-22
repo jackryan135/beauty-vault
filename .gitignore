@@ -115,4 +115,7 @@ node_modules/
 
 # Temporary folders
 tmp/
-temp/ 
+temp/
+
+# Uploaded images
+public/uploads/ 
