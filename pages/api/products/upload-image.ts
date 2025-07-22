@@ -1,7 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next'
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { existsSync } from 'fs'
+import { uploadImage } from '../../../lib/storage'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method !== 'POST') {
@@ -15,33 +13,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       return res.status(400).json({ error: 'Image data is required' })
     }
 
-    // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads')
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true })
+    const result = await uploadImage(imageBase64, fileName || 'uploaded-image')
+
+    if (!result.success) {
+      return res.status(500).json({ 
+        error: 'Failed to upload image',
+        details: result.error 
+      })
     }
 
-    // Generate unique filename
-    const timestamp = Date.now()
-    const randomId = Math.random().toString(36).substring(2, 15)
-    const extension = 'jpg' // Default to jpg for base64 images
-    const uniqueFileName = `${timestamp}-${randomId}.${extension}`
-    
-    // Decode base64 image
-    const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '')
-    const buffer = Buffer.from(base64Data, 'base64')
-
-    // Save file
-    const filePath = join(uploadsDir, uniqueFileName)
-    await writeFile(filePath, buffer)
-
-    // Return the public URL
-    const imageUrl = `/uploads/${uniqueFileName}`
-
-    res.status(200).json({ 
-      success: true, 
-      imageUrl,
-      fileName: uniqueFileName
+    res.status(200).json({
+      success: true,
+      imageUrl: result.imageUrl,
+      fileName: result.fileName
     })
   } catch (error) {
     console.error('Image upload error:', error)
