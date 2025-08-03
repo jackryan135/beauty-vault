@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { Search, Camera, Upload, Loader2, X, Check } from 'lucide-react'
+import { Search, Camera, Upload, Loader2, X, Check, AlertCircle } from 'lucide-react'
+import { aggressiveCompressImage, validateImageForAI } from '../lib/image-compression'
 
 interface AIProductSearchProps {
   onProductFound: (productInfo: {
@@ -28,7 +29,10 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
   const [searchResult, setSearchResult] = useState<any>(null)
   const [error, setError] = useState('')
   const [uploadedImageData, setUploadedImageData] = useState<string>('')
+  const [compressionStatus, setCompressionStatus] = useState<string>('')
   const fileInputRef = useRef<HTMLInputElement>(null)
+  const cameraInputRef = useRef<HTMLInputElement>(null)
+  const frontCameraInputRef = useRef<HTMLInputElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
 
   const handleNameSearch = async () => {
@@ -77,46 +81,35 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
     const file = event.target.files?.[0]
     if (!file) return
 
-    // Validate file type
-    if (!file.type.startsWith('image/')) {
-      setError('Please select a valid image file')
-      return
-    }
-
-    // Validate file size (max 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-      setError('Image file size must be less than 5MB')
+    // Validate image for AI analysis
+    const validation = validateImageForAI(file)
+    if (!validation.valid) {
+      setError(validation.error || 'Invalid image file')
       return
     }
 
     setIsSearching(true)
     setError('')
     setSearchResult(null)
+    setCompressionStatus('Compressing image for optimal AI analysis...')
 
     try {
-      // Convert image to base64
-      const base64 = await new Promise<string>((resolve, reject) => {
-        const reader = new FileReader()
-        reader.onload = () => {
-          const result = reader.result as string
-          // Store the full data URL for display
-          setUploadedImageData(result)
-          // Remove data:image/jpeg;base64, prefix for API
-          const base64Data = result.split(',')[1]
-          resolve(base64Data)
-        }
-        reader.onerror = reject
-        reader.readAsDataURL(file)
-      })
+      // Aggressively compress the image for AI analysis
+      const compressedImage = await aggressiveCompressImage(file, 512 * 1024) // 512KB target
+      
+      setCompressionStatus('')
+      
+      // Store the compressed data URL for display
+      setUploadedImageData(compressedImage.dataUrl)
 
-      // First, upload the image to get a URL
+      // First, upload the compressed image to get a URL
       const uploadResponse = await fetch('/api/products/upload-image', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          imageBase64: base64,
+          imageBase64: compressedImage.base64,
           fileName: file.name
         })
       })
@@ -128,7 +121,7 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
       const uploadResult = await uploadResponse.json()
       const uploadedImageUrl = uploadResult.imageUrl
 
-      // Now analyze the image
+      // Now analyze the compressed image
       const response = await fetch('/api/products/ai-search', {
         method: 'POST',
         headers: {
@@ -136,7 +129,7 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
         },
         body: JSON.stringify({
           type: 'image',
-          imageBase64: base64
+          imageBase64: compressedImage.base64
         })
       })
 
@@ -182,6 +175,7 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
     setSearchResult(null)
     setError('')
     setUploadedImageData('')
+    setCompressionStatus('')
     if (searchMode === 'name') {
       setName('')
       setBrand('')
@@ -316,26 +310,91 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
                     className="hidden"
                     disabled={isSearching}
                   />
-                  <button
-                    onClick={() => fileInputRef.current?.click()}
+                  <input
+                    ref={cameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="environment"
+                    onChange={handleImageUpload}
+                    className="hidden"
                     disabled={isSearching}
-                    className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-3 px-4 rounded-lg flex items-center justify-center space-x-2"
-                  >
-                    {isSearching ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Analyzing...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Upload className="w-4 h-4" />
-                        <span>Upload Product Photo</span>
-                      </>
-                    )}
-                  </button>
+                  />
+                  <input
+                    ref={frontCameraInputRef}
+                    type="file"
+                    accept="image/*"
+                    capture="user"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                    disabled={isSearching}
+                  />
+                  <div className="space-y-3">
+                    <div className="grid grid-cols-2 gap-3">
+                      <button
+                        onClick={() => cameraInputRef.current?.click()}
+                        disabled={isSearching}
+                        className="bg-green-500 hover:bg-green-600 disabled:bg-gray-300 text-white py-3 px-4 rounded-lg flex items-center justify-center space-x-2"
+                      >
+                        {isSearching ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Analyzing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Camera className="w-4 h-4" />
+                            <span>Back Camera</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        onClick={() => frontCameraInputRef.current?.click()}
+                        disabled={isSearching}
+                        className="bg-purple-500 hover:bg-purple-600 disabled:bg-gray-300 text-white py-3 px-4 rounded-lg flex items-center justify-center space-x-2"
+                      >
+                        {isSearching ? (
+                          <>
+                            <Loader2 className="w-4 h-4 animate-spin" />
+                            <span>Analyzing...</span>
+                          </>
+                        ) : (
+                          <>
+                            <Camera className="w-4 h-4" />
+                            <span>Front Camera</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
+                    <button
+                      onClick={() => fileInputRef.current?.click()}
+                      disabled={isSearching}
+                      className="w-full bg-blue-500 hover:bg-blue-600 disabled:bg-gray-300 text-white py-3 px-4 rounded-lg flex items-center justify-center space-x-2"
+                    >
+                      {isSearching ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Analyzing...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-4 h-4" />
+                          <span>Choose from Gallery</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
                   <p className="text-sm text-gray-500 mt-2">
-                    Upload a clear photo of the product packaging
+                    Take a photo or choose from your gallery. For best results, ensure the product packaging is clearly visible.
                   </p>
+                  <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <div className="flex items-start space-x-2">
+                      <AlertCircle className="w-4 h-4 text-blue-600 mt-0.5 flex-shrink-0" />
+                      <div className="text-xs text-blue-700">
+                        <p className="font-medium mb-1">Image Optimization</p>
+                        <p>Images are automatically compressed to optimize AI analysis while reducing storage usage. This helps maintain search accuracy while staying within storage limits.</p>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               ) : (
                 <div className="space-y-4">
@@ -349,7 +408,7 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
                       <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center rounded-lg">
                         <div className="text-white text-center">
                           <Loader2 className="w-8 h-8 animate-spin mx-auto mb-2" />
-                          <p>Analyzing image...</p>
+                          <p>{compressionStatus || 'Analyzing image...'}</p>
                         </div>
                       </div>
                     )}
