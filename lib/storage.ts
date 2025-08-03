@@ -19,6 +19,17 @@ export async function uploadImage(
   const base64Data = imageBase64.replace(/^data:image\/[a-z]+;base64,/, '')
   const buffer = Buffer.from(base64Data, 'base64')
   
+  // Check file size to ensure we stay well under the 128MB limit
+  const fileSizeMB = buffer.length / (1024 * 1024)
+  if (fileSizeMB > 100) { // Keep under 100MB to be safe
+    return {
+      success: false,
+      imageUrl: '',
+      fileName: fileName,
+      error: `File size (${fileSizeMB.toFixed(1)}MB) exceeds the maximum allowed size. Please try a smaller image.`
+    }
+  }
+  
   // Generate unique filename
   const timestamp = Date.now()
   const randomId = Math.random().toString(36).substring(2, 15)

@@ -26,6 +26,16 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         return res.status(400).json({ error: 'Image data is required for image search' })
       }
 
+      // Validate image size to ensure we stay under storage limits
+      const imageSizeBytes = Math.ceil((imageBase64.length * 3) / 4)
+      const imageSizeMB = imageSizeBytes / (1024 * 1024)
+      
+      if (imageSizeMB > 100) { // Keep under 100MB to be safe
+        return res.status(400).json({ 
+          error: `Image size (${imageSizeMB.toFixed(1)}MB) is too large. Please try a smaller image.` 
+        })
+      }
+
       result = await parseProductFromImage(imageBase64)
       
       // Add UPC field to the response if it exists
