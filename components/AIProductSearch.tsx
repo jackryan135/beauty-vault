@@ -7,7 +7,6 @@ interface AIProductSearchProps {
   onProductFound: (productInfo: {
     name: string
     brand: string
-    price: number
     image_url: string
     description?: string
     size?: string
@@ -143,7 +142,6 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
         setSearchResult({
           name: result.name || '',
           brand: result.brand || '',
-          price: result.price || 0,
           image_url: uploadedImageUrl, // Use the uploaded image URL
           description: result.description || '',
           size: result.size || '',
@@ -458,9 +456,6 @@ const AIProductSearch: React.FC<AIProductSearchProps> = ({
                   <div className="space-y-2 text-sm text-green-700">
                     <div><strong>Name:</strong> <span className="break-words">{searchResult.name}</span></div>
                     <div><strong>Brand:</strong> {searchResult.brand}</div>
-                    {searchResult.price > 0 && (
-                      <div><strong>Price:</strong> ${searchResult.price.toFixed(2)}</div>
-                    )}
                     {searchResult.category && (
                       <div><strong>Category:</strong> {searchResult.category}</div>
                     )}

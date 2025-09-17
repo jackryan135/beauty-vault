@@ -54,7 +54,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           ...result,
           name: enrichedInfo.cleanedName || result.name,
           description: enrichedInfo.description || result.description,
-          price: enrichedInfo.price || result.price,
+          price: 0,
           size: enrichedInfo.size || result.size,
           category: enrichedInfo.category || result.category,
           ingredients: enrichedInfo.ingredients

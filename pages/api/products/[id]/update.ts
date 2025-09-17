@@ -16,7 +16,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   try {
     await initializeDatabase()
 
-    const { name, brand, price, image_url, metadata } = req.body
+    const { name, brand, image_url, metadata } = req.body
 
     // Validate required fields
     if (!name || !brand) {
@@ -26,10 +26,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     // Update the product
     const result = await db.query(
       `UPDATE products 
-       SET name = $1, brand = $2, price = $3, image_url = $4, metadata = $5, updated_at = NOW()
-       WHERE id = $6
+       SET name = $1, brand = $2, image_url = $3, metadata = $4, updated_at = NOW()
+       WHERE id = $5
        RETURNING *`,
-      [name, brand, price, image_url, JSON.stringify(metadata), id]
+      [name, brand, image_url, JSON.stringify(metadata), id]
     )
 
     if (result.rows.length === 0) {

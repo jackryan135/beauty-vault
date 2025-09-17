@@ -273,11 +273,8 @@ const ProductCard: React.FC<ProductCardProps> = ({
           </div>
         )}
 
-        {/* Price and SKU */}
+        {/* SKU */}
         <div className="mb-4">
-          <div className="text-2xl font-bold text-gradient mb-1">
-            {product.price > 0 ? `$${product.price}` : 'Price Unknown'}
-          </div>
           <div className="text-xs text-gray-500 font-medium">
             SKU: {product.sku}
           </div>

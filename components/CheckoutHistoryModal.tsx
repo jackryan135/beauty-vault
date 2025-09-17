@@ -7,7 +7,6 @@ interface CheckoutHistoryItem {
   id: string
   name: string
   brand: string
-  price: number
   quantity: number
   item_total: number
   image_url: string
@@ -17,7 +16,6 @@ interface CheckoutHistoryItem {
 
 interface CheckoutHistorySummary {
   total_items: number
-  total_value: number
   unique_products: number
 }
 
@@ -75,13 +73,6 @@ export default function CheckoutHistoryModal({
       month: 'short',
       day: 'numeric'
     })
-  }
-
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD'
-    }).format(amount)
   }
 
   return (
@@ -149,15 +140,6 @@ export default function CheckoutHistoryModal({
                       </div>
                     </div>
                     
-                    <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-xl border border-green-200">
-                      <div className="flex items-center space-x-3">
-                        <DollarSign className="h-8 w-8 text-green-600" />
-                        <div>
-                          <p className="text-sm text-green-600 font-medium">Total Value</p>
-                          <p className="text-2xl font-bold text-green-800">{formatCurrency(history.summary.total_value)}</p>
-                        </div>
-                      </div>
-                    </div>
                     
                     <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-xl border border-purple-200">
                       <div className="flex items-center space-x-3">
@@ -208,11 +190,8 @@ export default function CheckoutHistoryModal({
                             </div>
                             
                             <div className="text-right">
-                              <div className="text-lg font-semibold text-gray-900">
-                                {formatCurrency(item.item_total)}
-                              </div>
                               <div className="text-sm text-gray-600">
-                                {item.quantity} × {formatCurrency(item.price)}
+                                Quantity: {item.quantity}
                               </div>
                             </div>
                           </div>

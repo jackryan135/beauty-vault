@@ -151,7 +151,7 @@ export class ProductFetcher {
         return {
           name: cleaned.name,
           brand: cleaned.brand,
-          price: item.offers?.[0]?.price || enrichedInfo.price || 0,
+          price: 0,
           image_url: imageUrl,
           description: cleaned.description || enrichedInfo.description,
           category: this.determineCategory(cleaned.name) || this.mapCategory(item.category) || enrichedInfo.category,
@@ -215,7 +215,7 @@ export class ProductFetcher {
         return {
           name: cleaned.name,
           brand: cleaned.brand,
-          price: enrichedInfo.price || 0,
+          price: 0,
           image_url: imageUrl,
           description: cleaned.description || enrichedInfo.description,
           category: this.determineCategory(cleaned.name) || this.mapCategory(product.categories_tags?.[0]) || enrichedInfo.category,
@@ -279,7 +279,7 @@ export class ProductFetcher {
         return {
           name: cleaned.name,
           brand: cleaned.brand,
-          price: parseFloat(product.lowest_recorded_price) || enrichedInfo.price || 0,
+          price: 0,
           image_url: imageUrl,
           description: cleaned.description || enrichedInfo.description,
           category: this.determineCategory(cleaned.name) || this.mapCategory(product.category) || enrichedInfo.category,
@@ -380,7 +380,7 @@ export class ProductFetcher {
       'SEPHORA001': {
         name: 'Pro Filt\'r Soft Matte Longwear Liquid Foundation',
         brand: 'Fenty Beauty',
-        price: 38,
+        price: 0,
         image_url: 'https://placehold.co/400x400/fce7f3/ec4899?text=Fenty%20Beauty%20Foundation',
         description: 'A soft matte, long-wear liquid foundation with buildable, medium-to-full coverage',
         category: 'Foundation',
@@ -393,7 +393,7 @@ export class ProductFetcher {
       'GLOSSIER001': {
         name: 'Boy Brow',
         brand: 'Glossier',
-        price: 18,
+        price: 0,
         image_url: 'https://placehold.co/400x400/fce7f3/ec4899?text=Glossier%20Boy%20Brow',
         description: 'A tiny brush that thickens, shapes, and grooms brows into place',
         category: 'Brow',
@@ -406,7 +406,7 @@ export class ProductFetcher {
       'CHARLOTTE001': {
         name: 'Magic Cream',
         brand: 'Charlotte Tilbury',
-        price: 130,
+        price: 0,
         image_url: 'https://placehold.co/400x400/fce7f3/ec4899?text=Charlotte%20Tilbury%20Magic%20Cream',
         description: 'A luxurious, anti-aging moisturizer that instantly plumps and smooths',
         category: 'Moisturizer',
@@ -419,7 +419,7 @@ export class ProductFetcher {
       'RARE001': {
         name: 'Liquid Touch Brightening Concealer',
         brand: 'Rare Beauty',
-        price: 22,
+        price: 0,
         image_url: 'https://placehold.co/400x400/fce7f3/ec4899?text=Rare%20Beauty%20Concealer',
         description: 'A lightweight, buildable concealer that brightens and covers',
         category: 'Concealer',

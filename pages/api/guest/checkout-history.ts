@@ -20,7 +20,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: { id: st
         p.id as product_id,
         p.name,
         p.brand,
-        p.price,
         p.image_url,
         p.sku
        FROM shopping_list_items sli
@@ -33,19 +32,15 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: { id: st
 
     // Calculate totals
     let totalItems = 0
-    let totalValue = 0
     const items = historyResult.rows.map(row => {
-      const itemTotal = parseFloat(row.price) * row.quantity
       totalItems += row.quantity
-      totalValue += itemTotal
       
       return {
         id: row.product_id,
         name: row.name,
         brand: row.brand,
-        price: parseFloat(row.price),
         quantity: row.quantity,
-        item_total: itemTotal,
+        item_total: 0, // No longer used
         image_url: row.image_url,
         sku: row.sku,
         checkout_date: row.checkout_date
@@ -58,7 +53,6 @@ async function handler(req: NextApiRequest, res: NextApiResponse, user: { id: st
         items,
         summary: {
           total_items: totalItems,
-          total_value: totalValue,
           unique_products: items.length
         }
       }

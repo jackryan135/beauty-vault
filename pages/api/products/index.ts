@@ -100,7 +100,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         productInfo = {
           name: providedProductInfo.name,
           brand: providedProductInfo.brand,
-          price: providedProductInfo.price || 0,
+          price: 0,
           image_url: providedProductInfo.image_url || providedProductInfo.uploadedImage || '',
           description: providedProductInfo.description,
           category: providedProductInfo.category,
@@ -124,7 +124,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           sku, 
           productInfo.name, 
           productInfo.brand, 
-          productInfo.price, 
+          0,
           productInfo.image_url, 
           1, 
           true, 

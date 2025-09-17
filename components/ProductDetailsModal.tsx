@@ -17,7 +17,6 @@ interface ProductDetailsModalProps {
 interface FormData {
   name: string
   brand: string
-  price: number
   description: string
   category: string
   size: string
@@ -35,7 +34,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   const [formData, setFormData] = useState<FormData>({
     name: '',
     brand: '',
-    price: 0,
     description: '',
     category: '',
     size: '',
@@ -52,7 +50,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
       setFormData({
         name: product.name || '',
         brand: product.brand || '',
-        price: Number(product.price) || 0,
         description: product.metadata?.description || '',
         category: product.metadata?.category || '',
         size: product.metadata?.size || '',
@@ -78,7 +75,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
         ...product,
         name: formData.name,
         brand: formData.brand,
-        price: formData.price,
         image_url: formData.image_url,
         metadata: {
           ...product.metadata,
@@ -112,7 +108,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
   const handleAIProductFound = async (productInfo: {
     name: string
     brand: string
-    price: number
     image_url: string
     description?: string
     size?: string
@@ -126,7 +121,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
     const updatedFormData = {
       name: productInfo.name,
       brand: productInfo.brand,
-      price: productInfo.price,
       image_url: productInfo.uploadedImage || productInfo.image_url,
       description: productInfo.description || '',
       size: productInfo.size || '',
@@ -143,7 +137,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
         ...product,
         name: updatedFormData.name,
         brand: updatedFormData.brand,
-        price: updatedFormData.price,
         image_url: updatedFormData.image_url,
         metadata: {
           ...product.metadata,
@@ -163,7 +156,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
       setFormData({
         name: product.name || '',
         brand: product.brand || '',
-        price: Number(product.price) || 0,
         description: product.metadata?.description || '',
         category: product.metadata?.category || '',
         size: product.metadata?.size || '',
@@ -337,21 +329,6 @@ const ProductDetailsModal: React.FC<ProductDetailsModalProps> = ({
                       )}
                     </div>
 
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Price
-                      </label>
-                      {isEditing ? (
-                        <input
-                          type="number"
-                          step="0.01"
-                          value={formData.price || ''}
-                          onChange={(e) => handleInputChange('price', parseFloat(e.target.value) || 0)}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        />
-                      ) : (
-                        <p className="text-gray-900">${Number(formData.price).toFixed(2)}</p>
-                      )}
                     </div>
                   </div>
                 </div>

@@ -144,7 +144,7 @@ export default function ShoppingListModal({
                               <p className={`text-sm ${
                                 item.is_checked_out ? 'text-green-600' : 'text-gray-600'
                               }`}>
-                                {item.product?.brand || 'Brand'} • ${item.product?.price || 0}
+                                {item.product?.brand || 'Brand'}
                               </p>
                             </div>
                           </div>

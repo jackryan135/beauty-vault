@@ -252,7 +252,7 @@ export default function AdminShoppingListsModal({
                                         <p className={`text-xs ${
                                           item.is_checked_out ? 'text-green-600' : 'text-gray-600'
                                         }`}>
-                                          Qty: {item.quantity} • ${item.product?.price || 0}
+                                          Qty: {item.quantity}
                                         </p>
                                       </div>
                                     </div>

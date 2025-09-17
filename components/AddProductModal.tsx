@@ -43,7 +43,6 @@ export default function AddProductModal({ isOpen, onClose, onAddProduct }: AddPr
   const handleAIProductFound = (productInfo: {
     name: string
     brand: string
-    price: number
     image_url: string
     description?: string
     size?: string
