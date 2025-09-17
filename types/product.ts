@@ -3,7 +3,6 @@ export interface Product {
   sku: string
   name: string
   brand: string
-  price: number
   image_url: string
   quantity: number
   is_active: boolean

@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   if (req.method === 'GET') {
     try {
       console.log('Fetching products from database...')
-      const { rows } = await db.query('SELECT * FROM products ORDER BY created_at DESC')
+      const { rows } = await db.query('SELECT id, sku, name, brand, image_url, quantity, is_active, status, metadata, created_at, updated_at FROM products ORDER BY created_at DESC')
       console.log(`Found ${rows.length} products`)
       
       // Set cache control headers to prevent caching
@@ -68,7 +68,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       // Check if product already exists
-      const existingProduct = await db.query('SELECT * FROM products WHERE sku = $1', [sku])
+      const existingProduct = await db.query('SELECT id, sku, name, brand, image_url, quantity, is_active, status, metadata, created_at, updated_at FROM products WHERE sku = $1', [sku])
 
       if (existingProduct.rows.length > 0) {
         // Update existing product - SCAN IN (increase quantity)
@@ -100,7 +100,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         productInfo = {
           name: providedProductInfo.name,
           brand: providedProductInfo.brand,
-          price: 0,
           image_url: providedProductInfo.image_url || providedProductInfo.uploadedImage || '',
           description: providedProductInfo.description,
           category: providedProductInfo.category,
@@ -119,12 +118,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
 
       const { rows } = await db.query(
-        'INSERT INTO products (sku, name, brand, price, image_url, quantity, is_active, status, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING *',
+        'INSERT INTO products (sku, name, brand, image_url, quantity, is_active, status, metadata) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *',
         [
           sku, 
           productInfo.name, 
           productInfo.brand, 
-          0,
           productInfo.image_url, 
           1, 
           true, 

@@ -1,6 +1,6 @@
 # Olivia's Beauty Vault 💄✨
 
-A beautiful, Sephora-inspired product catalog for managing your personal beauty collection. Built with Next.js, TypeScript, and Tailwind CSS.
+A beautiful, Sephora-inspired product catalog for managing your personal beauty collection. This application functions as a library of owned products, not a store, and therefore does not track prices. Built with Next.js, TypeScript, and Tailwind CSS.
 
 [![Next.js](https://img.shields.io/badge/Next.js-11.1.4-black)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-4.5.4-blue)](https://www.typescriptlang.org/)
