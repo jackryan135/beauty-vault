@@ -68,13 +68,10 @@ Inspired by Sephora's elegant design language:
 ## 🔐 Authentication
 
 ### Admin Access
-- **Name**: `Olivia`
-- **Password**: `wally`
 - **Features**: Full access to all vault features
 - **Shopping Lists**: Can view and manage all guest shopping lists
 
 ### Guest Access
-- **Password**: `winnie`
 - **Features**: View products on shelf only
 - **Shopping Lists**: Create and manage personal shopping list
 - **Session**: 2-hour persistence
